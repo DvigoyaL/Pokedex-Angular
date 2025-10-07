@@ -9,9 +9,8 @@ import { forkJoin, switchMap } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-
 export class AppComponent implements OnInit {
   pokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
@@ -21,26 +20,27 @@ export class AppComponent implements OnInit {
   currentSpriteIndex: number = 0;
   private spriteInterval: any;
 
-  constructor(private pokemonService: Pokemon) { }
+  constructor(private pokemonService: Pokemon) {}
 
   ngOnInit() {
     this.loadPokemon();
   }
 
-  loadPokemon(){
-    this.pokemonService.getListPokemon(this.offset)
+  loadPokemon() {
+    this.pokemonService
+      .getListPokemon(this.offset)
       .pipe(
         switchMap((data: PokemonListResponse) => {
-        const detailObservables = data.results.map(pokemon =>
-          this.pokemonService.getPokemonDetails(pokemon.url)
-        );
-        return forkJoin(detailObservables);
-      })
-    )
-    .subscribe((detailedPokemons: PokemonDetails[]) => {
-      this.pokemonList = detailedPokemons;
-      console.log(this.pokemonList);
-    });
+          const detailObservables = data.results.map((pokemon) =>
+            this.pokemonService.getPokemonDetails(pokemon.url)
+          );
+          return forkJoin(detailObservables);
+        })
+      )
+      .subscribe((detailedPokemons: PokemonDetails[]) => {
+        this.pokemonList = detailedPokemons;
+        console.log(this.pokemonList);
+      });
   }
 
   selectPokemon(pokemon: PokemonDetails) {
@@ -48,7 +48,7 @@ export class AppComponent implements OnInit {
       clearInterval(this.spriteInterval);
     }
     this.selectedPokemon = pokemon;
-    this.spriteUrls = Object.values(pokemon.sprites).filter(url => typeof url === 'string');
+    this.spriteUrls = Object.values(pokemon.sprites).filter((url) => typeof url === 'string');
     this.currentSpriteIndex = 0;
 
     this.spriteInterval = setInterval(() => {
@@ -70,6 +70,5 @@ export class AppComponent implements OnInit {
   onNextPage() {
     this.offset += this.limit;
     this.loadPokemon();
-  }    
-
+  }
 }
