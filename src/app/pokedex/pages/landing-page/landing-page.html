@@ -1,40 +1,72 @@
-<h1>My Pokédex</h1>
-
-<div>
-  <ul class="pokemon-container">
-    <li *ngFor="let pokemon of pokemonList" class="pokemon-card" (click)="selectPokemon(pokemon)">
-      <img [src]="pokemon.sprites.front_default" alt="Image of {{ pokemon.name }}" />
-      <p>{{ pokemon.name }}</p>
-      <p>#{{ pokemon.id }}</p>
-    </li>
-  </ul>
-
-  <div class="pagination-controls">
-    <button (click)="onPreviousPage()">Previous</button>
-    <button (click)="onNextPage()">Next</button>
+<div
+  class="landing-container"
+  style="
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);
+  "
+>
+  <img
+    src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png"
+    alt="Pokédex Logo"
+    style="width: 180px; margin-bottom: 24px"
+  />
+  <h1 style="font-size: 2.5rem; color: #fbc02d; font-weight: bold; margin-bottom: 16px">
+    Bienvenido a Mi Pokédex
+  </h1>
+  <p
+    style="
+      font-size: 1.2rem;
+      color: #555;
+      max-width: 500px;
+      text-align: center;
+      margin-bottom: 32px;
+    "
+  >
+    Este proyecto fue creado para aprender desarrollo web usando
+    <span style="color: #e53935; font-weight: bold">Angular</span> y la
+    <span style="color: #1976d2; font-weight: bold">API de Pokédex</span>. Aquí puedes explorar y
+    buscar tus Pokémon favoritos, ver sus detalles y practicar tus habilidades de programación.
+  </p>
+  <div style="display: flex; gap: 20px">
+    <a
+      routerLink="/list-page"
+      style="
+        background: #fbc02d;
+        color: #fff;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: background 0.2s;
+      "
+    >
+      Ir a la Pokédex
+    </a>
+    <a
+      href="https://pokeapi.co/"
+      target="_blank"
+      style="
+        background: #1976d2;
+        color: #fff;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: background 0.2s;
+      "
+    >
+      Ver la API
+    </a>
   </div>
-</div>
-
-<div *ngIf="selectedPokemon" class="modal-overlay" (click)="closeModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>{{ selectedPokemon.name }}</h2>
-      <p>#{{ selectedPokemon.id }}</p>
-    </div>
-
-    <div class="modal-body">
-      <div class="left-column">
-        <img [src]="spriteUrls[currentSpriteIndex]" alt="Image of {{ selectedPokemon.name }}" />
-      </div>
-
-      <div class="right-column">
-        <h4>Types</h4>
-        <div class="types-container">
-          <span *ngFor="let typeInfo of selectedPokemon.types" class="type-badge">
-            {{ typeInfo.type.name }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
+  <footer style="margin-top: 48px; color: #888; font-size: 0.95rem">
+    Hecho con ❤️ para aprender Angular y desarrollo web.
+  </footer>
 </div>
