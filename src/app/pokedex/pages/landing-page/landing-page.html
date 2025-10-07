@@ -1,0 +1,40 @@
+<h1>My Pokédex</h1>
+
+<div>
+  <ul class="pokemon-container">
+    <li *ngFor="let pokemon of pokemonList" class="pokemon-card" (click)="selectPokemon(pokemon)">
+      <img [src]="pokemon.sprites.front_default" alt="Image of {{ pokemon.name }}" />
+      <p>{{ pokemon.name }}</p>
+      <p>#{{ pokemon.id }}</p>
+    </li>
+  </ul>
+
+  <div class="pagination-controls">
+    <button (click)="onPreviousPage()">Previous</button>
+    <button (click)="onNextPage()">Next</button>
+  </div>
+</div>
+
+<div *ngIf="selectedPokemon" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ selectedPokemon.name }}</h2>
+      <p>#{{ selectedPokemon.id }}</p>
+    </div>
+
+    <div class="modal-body">
+      <div class="left-column">
+        <img [src]="spriteUrls[currentSpriteIndex]" alt="Image of {{ selectedPokemon.name }}" />
+      </div>
+
+      <div class="right-column">
+        <h4>Types</h4>
+        <div class="types-container">
+          <span *ngFor="let typeInfo of selectedPokemon.types" class="type-badge">
+            {{ typeInfo.type.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
