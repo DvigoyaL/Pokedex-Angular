@@ -108,21 +108,15 @@ export default class ListPage implements OnInit {
                 });
                 resistances.forEach(r => weaknesses.delete(r));
 
-                const evoChain: { name: string; id: string }[] = [];
-                let currentLink: ChainLink | undefined = evolutionChain.chain;
-                while (currentLink) {
-                  const urlParts = currentLink.species.url.split('/');
-                  const id = urlParts[urlParts.length - 2];
-                  evoChain.push({ name: currentLink.species.name, id });
-                  currentLink = currentLink.evolves_to[0];
-                }
+                // Aplanamos toda la cadena evolutiva, incluyendo ramificaciones.
+                const evoChain = this.flattenEvolutionChain(evolutionChain.chain);
                 
                 return {
                   ...details,
                   habitat: species.habitat?.name || 'Desconocido',
                   description,
                   weaknesses: Array.from(weaknesses),
-                  evolutionChain: evoChain,
+                  evolutionChain: evoChain, // Ahora contiene la cadena completa
                 };
               })
             );
@@ -130,6 +124,32 @@ export default class ListPage implements OnInit {
         );
       })
     );
+  }
+
+  private flattenEvolutionChain(chainLink: ChainLink): { name: string; id: string }[] {
+    const chain: { name: string; id: string }[] = [];
+    let currentLink: ChainLink | undefined = chainLink;
+
+    while (currentLink) {
+      const urlParts = currentLink.species.url.split('/');
+      const id = urlParts[urlParts.length - 2];
+      chain.push({ name: currentLink.species.name, id });
+
+      // Si hay múltiples evoluciones (como Eevee), las procesamos todas.
+      if (currentLink.evolves_to.length > 1) {
+        currentLink.evolves_to.forEach(evo => {
+          const evoUrlParts = evo.species.url.split('/');
+          const evoId = evoUrlParts[evoUrlParts.length - 2];
+          chain.push({ name: evo.species.name, id: evoId });
+        });
+        // Detenemos el bucle principal porque ya hemos añadido todas las ramas.
+        currentLink = undefined; 
+      } else {
+        // Si es una evolución lineal, simplemente avanzamos.
+        currentLink = currentLink.evolves_to[0];
+      }
+    }
+    return chain;
   }
 
   private setupSpriteGallery(pokemon: PokemonDetails): void {
@@ -186,5 +206,41 @@ export default class ListPage implements OnInit {
 
   getTypeIcon(typeName: string): string {
     return `assets/icons/types/${typeName.toLowerCase()}.svg`;
+  }
+
+private getCurrentPokemonIndex(): number {
+    if (!this.selectedPokemon) return -1;
+    return this.pokemonList.findIndex(p => p.id === this.selectedPokemon!.id);
+  }
+
+  // Comprueba si se puede ir al Pokémon anterior
+  canGoToPrevious(): boolean {
+    return this.getCurrentPokemonIndex() > 0;
+  }
+
+  // Comprueba si se puede ir al siguiente Pokémon
+  canGoToNext(): boolean {
+    const currentIndex = this.getCurrentPokemonIndex();
+    return currentIndex > -1 && currentIndex < this.pokemonList.length - 1;
+  }
+
+  // Navega al Pokémon anterior en la lista
+  goToPreviousPokemon(event: MouseEvent): void {
+    event.stopPropagation(); // Evita que se cierre el modal
+    if (this.canGoToPrevious()) {
+      const currentIndex = this.getCurrentPokemonIndex();
+      const previousPokemon = this.pokemonList[currentIndex - 1];
+      this.selectPokemon(previousPokemon);
+    }
+  }
+
+  // Navega al siguiente Pokémon en la lista
+  goToNextPokemon(event: MouseEvent): void {
+    event.stopPropagation(); // Evita que se cierre el modal
+    if (this.canGoToNext()) {
+      const currentIndex = this.getCurrentPokemonIndex();
+      const nextPokemon = this.pokemonList[currentIndex + 1];
+      this.selectPokemon(nextPokemon);
+    }
   }
 }
