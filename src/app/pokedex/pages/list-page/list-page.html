@@ -1,195 +1,185 @@
 <h1 class="text-3xl font-bold text-center my-8 text-yellow-600">Mi Pokédex</h1>
 
 @if (isLoading) {
-
-<div class="text-center my-8">
-  <p class="text-xl text-gray-600">Cargando Pokémon...</p>
-</div>
+  <div class="text-center my-8">
+    <p class="text-xl text-gray-600">Cargando Pokémon...</p>
+  </div>
 
 } @if (error) {
-
-<div class="text-center my-8 bg-red-100 text-red-700 p-4 rounded-lg">
-  <p>{{ error }}</p>
-</div>
+  <div class="text-center my-8 bg-red-100 text-red-700 p-4 rounded-lg">
+    <p>{{ error }}</p>
+  </div>
 
 } @if (!isLoading && !error) {
+  <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-4 p-4">
+    @for (pokemon of pokemonList; track $index) {
+      <pokedex-pokemon-basic-card
+        [pokemon] = "pokemon"
+        [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+        (cardClicked)="selectPokemon($event)"
+      />
+    }
+  </ul>
 
-<ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-4 p-4">
-  @for (pokemon of pokemonList; track $index) {
-  <li
-    class="shadow-md rounded-lg p-4 flex flex-col items-center cursor-pointer hover:opacity-80 hover:scale-105 transition"
-    (click)="selectPokemon(pokemon)"
-    [ngStyle]="{ 'background-color': getColorForType(pokemon.types[0].type.name) }"
-  >
-    <img
-      [src]="pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default"
-      alt="Imagen de {{ pokemon.name }}"
-      class="w-24 h-24 object-contain mb-2"
-    />
-    <p class="capitalize font-semibold text-lg text-gray-800">{{ pokemon.name }}</p>
-    <p class="text-gray-500">#{{ pokemon.id }}</p>
-  </li>
-  }
-</ul>
-
-<div class="flex justify-center gap-4 my-8">
-  <button
-    (click)="onPreviousPage()"
-    [disabled]="offset === 0 || isLoading"
-    class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    Anterior
-  </button>
-  <button
-    (click)="onNextPage()"
-    [disabled]="isLoading"
-    class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    Siguiente
-  </button>
-</div>
+  <div class="flex justify-center gap-4 my-8">
+    <button
+      (click)="onPreviousPage()"
+      [disabled]="offset === 0 || isLoading"
+      class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Anterior
+    </button>
+    <button
+      (click)="onNextPage()"
+      [disabled]="isLoading"
+      class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Siguiente
+    </button>
+  </div>
 
 } @if (selectedPokemon) {
-<div
-  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-  (click)="closeModal()"
->
   <div
-    class="rounded-lg p-6 max-w-4xl w-full shadow-lg relative mx-4 overflow-y-auto max-h-[90vh]"
-    (click)="$event.stopPropagation()"
-    [ngStyle]="{ 'background-color': getColorForType(selectedPokemon.types[0].type.name) }"
+    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+    (click)="closeModal()"
   >
-    <div class="relative text-center mb-4">
-      <h2
-        class="text-3xl font-bold capitalize"
-        [ngStyle]="{ color: getTextColor(getColorForType(selectedPokemon.types[0].type.name)) }"
-      >
-        {{ selectedPokemon.name }}
-      </h2>
-      <p
-        class="text-xl"
-        [ngStyle]="{ color: getTextColor(getColorForType(selectedPokemon.types[0].type.name)) }"
-      >
-        #{{ selectedPokemon.id }}
-      </p>
+    <div
+      class="rounded-lg p-6 max-w-4xl w-full shadow-lg relative mx-4 overflow-y-auto max-h-[90vh]"
+      (click)="$event.stopPropagation()"
+      [ngStyle]="{ 'background-color': getColorForType(selectedPokemon.types[0].type.name) }"
+    >
+      <div class="relative text-center mb-4">
+        <h2
+          class="text-3xl font-bold capitalize"
+          [ngStyle]="{ color: getTextColor(getColorForType(selectedPokemon.types[0].type.name)) }"
+        >
+          {{ selectedPokemon.name }}
+        </h2>
+        <p
+          class="text-xl"
+          [ngStyle]="{ color: getTextColor(getColorForType(selectedPokemon.types[0].type.name)) }"
+        >
+          #{{ selectedPokemon.id }}
+        </p>
 
-      <div class="absolute top-0 right-0 flex gap-2">
-        @for (typeInfo of selectedPokemon.types; track $index) {
-        <div class="icon w-10 h-10" [ngClass]="typeInfo.type.name">
-          <img [src]="getTypeIcon(typeInfo.type.name)" [alt]="typeInfo.type.name" />
-        </div>
-        }
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="flex flex-col items-center">
-        <img
-          [src]="spriteUrls[currentSpriteIndex]"
-          alt="Imagen de {{ selectedPokemon.name }}"
-          class="w-48 h-48 object-contain"
-        />
-        <p class="text-sm text-gray-500 mt-2">Galería de Sprites</p>
-        <div class="mt-6 w-full">
-          <h4 class="text-lg font-semibold mb-2 text-gray-700 text-center">Estadísticas Base</h4>
-          <app-stats-chart [stats]="selectedPokemon.stats"></app-stats-chart>
+        <div class="absolute top-0 right-0 flex gap-2">
+          @for (typeInfo of selectedPokemon.types; track $index) {
+          <div class="icon w-10 h-10" [ngClass]="typeInfo.type.name">
+            <img [src]="getTypeIcon(typeInfo.type.name)" [alt]="typeInfo.type.name" />
+          </div>
+          }
         </div>
       </div>
 
-      <div class="flex flex-col">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-          <div>
-            <h4 class="text-lg font-semibold mb-2 text-gray-700">Descripción</h4>
-            <p class="text-gray-600 text-sm mb-4">{{ selectedPokemon.description }}</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col items-center">
+          <img
+            [src]="spriteUrls[currentSpriteIndex]"
+            alt="Imagen de {{ selectedPokemon.name }}"
+            class="w-48 h-48 object-contain"
+          />
+          <p class="text-sm text-gray-500 mt-2">Galería de Sprites</p>
+          <div class="mt-6 w-full">
+            <h4 class="text-lg font-semibold mb-2 text-gray-700 text-center">Estadísticas Base</h4>
+            <app-stats-chart [stats]="selectedPokemon.stats"></app-stats-chart>
+          </div>
+        </div>
 
-            <h4 class="text-lg font-semibold mb-2 text-gray-700">Atributos</h4>
-            <div class="flex flex-wrap gap-2 justify-start mb-4">
-              <span
-                class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
-                >Altura: {{ selectedPokemon.height / 10 }} m</span
-              >
-              <span
-                class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
-                >Peso: {{ selectedPokemon.weight / 10 }} kg</span
-              >
-            </div>
-
-            <h4 class="text-lg font-semibold mb-2 text-gray-700">Hábitat</h4>
-            @if (selectedPokemon.habitat !== 'Desconocido') {
+        <div class="flex flex-col">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <div>
-              <span
-                class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
-                >{{ selectedPokemon.habitat }}</span
-              >
-            </div>
-            } @else {
-            <p class="text-gray-500 text-sm">Desconocido</p>
-            }
-          </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-2 text-gray-700">Debilidades</h4>
-            <div class="flex flex-wrap gap-2 justify-start mb-4">
-              @for (weakness of selectedPokemon.weaknesses; track $index) {
-              <span
-                class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 border-2"
-                [ngStyle]="{
-                  'background-color': getColorForType(weakness),
-                  'border-color': getColorForType(weakness),
-                  color: getTextColor(getColorForType(weakness))
-                }"
-              >
-                <img
-                  [src]="getTypeIcon(weakness)"
-                  [alt]="weakness"
-                  class="w-4 h-4"
-                  [ngStyle]="{ filter: 'brightness(0) invert(1)' }"
-                />
-                {{ weakness }}
-              </span>
-              }
-            </div>
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Descripción</h4>
+              <p class="text-gray-600 text-sm mb-4">{{ selectedPokemon.description }}</p>
 
-            <h4 class="text-lg font-semibold mb-2 text-gray-700">Habilidades</h4>
-            <div class="flex flex-wrap gap-2 justify-start mb-4">
-              @for (abilityInfo of selectedPokemon.abilities; track $index) {
-              <span
-                class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
-                >{{ abilityInfo.ability.name }}</span
-              >
-              }
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 border-t pt-4">
-          <h4 class="text-lg font-semibold mb-4 text-gray-700 text-center">Evoluciones</h4>
-          <div class="flex justify-center items-center gap-2">
-            @for (evo of selectedPokemon.evolutionChain; track $index; let isLast = $last) {
-            <div
-              class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition"
-              (click)="selectPokemon(evo)"
-            >
-              <div class="bg-gray-100 rounded-full p-2">
-                <img
-                  [src]="
-                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' +
-                    evo.id +
-                    '.png'
-                  "
-                  [alt]="evo.name"
-                  class="w-24 h-24"
-                />
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Atributos</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
+                  >Altura: {{ selectedPokemon.height / 10 }} m</span
+                >
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
+                  >Peso: {{ selectedPokemon.weight / 10 }} kg</span
+                >
               </div>
-              <p class="capitalize font-semibold mt-2">{{ evo.name }}</p>
-              <p class="text-sm text-gray-500">#{{ evo.id.padStart(4, '0') }}</p>
+
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Hábitat</h4>
+              @if (selectedPokemon.habitat !== 'Desconocido') {
+              <div>
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
+                  >{{ selectedPokemon.habitat }}</span
+                >
+              </div>
+              } @else {
+              <p class="text-gray-500 text-sm">Desconocido</p>
+              }
             </div>
-            @if (!isLast) {
-            <div class="text-2xl text-gray-400 mx-4">&rarr;</div>
-            } }
+            <div>
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Debilidades</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                @for (weakness of selectedPokemon.weaknesses; track $index) {
+                <span
+                  class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 border-2"
+                  [ngStyle]="{
+                    'background-color': getColorForType(weakness),
+                    'border-color': getColorForType(weakness),
+                    color: getTextColor(getColorForType(weakness))
+                  }"
+                >
+                  <img
+                    [src]="getTypeIcon(weakness)"
+                    [alt]="weakness"
+                    class="w-4 h-4"
+                    [ngStyle]="{ filter: 'brightness(0) invert(1)' }"
+                  />
+                  {{ weakness }}
+                </span>
+                }
+              </div>
+
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Habilidades</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                @for (abilityInfo of selectedPokemon.abilities; track $index) {
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
+                  >{{ abilityInfo.ability.name }}</span
+                >
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 border-t pt-4">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 text-center">Evoluciones</h4>
+            <div class="flex justify-center items-center gap-2">
+              @for (evo of selectedPokemon.evolutionChain; track $index; let isLast = $last) {
+              <div
+                class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition"
+                (click)="selectPokemon(evo)"
+              >
+                <div class="bg-gray-100 rounded-full p-2">
+                  <img
+                    [src]="
+                      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' +
+                      evo.id +
+                      '.png'
+                    "
+                    [alt]="evo.name"
+                    class="w-24 h-24"
+                  />
+                </div>
+                <p class="capitalize font-semibold mt-2">{{ evo.name }}</p>
+                <p class="text-sm text-gray-500">#{{ evo.id.padStart(4, '0') }}</p>
+              </div>
+              @if (!isLast) {
+              <div class="text-2xl text-gray-400 mx-4">&rarr;</div>
+              } }
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
 }
