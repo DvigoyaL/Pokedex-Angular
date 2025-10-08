@@ -1,73 +1,94 @@
 <h1 class="text-3xl font-bold text-center my-8 text-yellow-600">Mi Pokédex</h1>
 
-<div>
-  <ul
-    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-10 gap-2 justify-items-center"
-  >
-    <li
-      *ngFor="let pokemon of pokemonList"
-      class="bg-white shadow-md rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-yellow-100 transition"
-      (click)="selectPokemon(pokemon)"
-    >
-      <img
-        [src]="pokemon.sprites.front_default"
-        alt="Imagen de {{ pokemon.name }}"
-        class="w-20 h-20 object-contain mb-2"
-      />
+<div *ngIf="isLoading" class="text-center my-8">
+  <p class="text-xl text-gray-600">Cargando Pokémon...</p>
+</div>
+<div *ngIf="error" class="text-center my-8 bg-red-100 text-red-700 p-4 rounded-lg">
+  <p>{{ error }}</p>
+</div>
+
+<div *ngIf="!isLoading && !error">
+  <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-4 p-4">
+    <li *ngFor="let pokemon of pokemonList" class="bg-white shadow-md rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-yellow-100 hover:scale-105 transition" (click)="selectPokemon(pokemon)">
+      <img [src]="pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default" alt="Imagen de {{ pokemon.name }}" class="w-24 h-24 object-contain mb-2" />
       <p class="capitalize font-semibold text-lg text-gray-800">{{ pokemon.name }}</p>
       <p class="text-gray-500">#{{ pokemon.id }}</p>
     </li>
   </ul>
 
-  <div class="flex justify-center gap-4 mt-8">
-    <button
-      (click)="onPreviousPage()"
-      class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50"
-    >
+  <div class="flex justify-center gap-4 my-8">
+    <button (click)="onPreviousPage()" [disabled]="offset === 0 || isLoading" class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
       Anterior
     </button>
-    <button
-      (click)="onNextPage()"
-      class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition"
-    >
+    <button (click)="onNextPage()" [disabled]="isLoading" class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
       Siguiente
     </button>
   </div>
 </div>
 
-<div
-  *ngIf="selectedPokemon"
-  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-  (click)="closeModal()"
->
-  <div
-    class="bg-white rounded-lg p-8 max-w-2xl w-full shadow-lg relative"
-    (click)="$event.stopPropagation()"
-  >
-    <div class="text-center mb-6">
-      <h2 class="text-2xl font-bold capitalize text-yellow-600">{{ selectedPokemon.name }}</h2>
-      <p class="text-gray-500">#{{ selectedPokemon.id }}</p>
+<div *ngIf="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" (click)="closeModal()">
+  <div class="bg-white rounded-lg p-6 max-w-4xl w-full shadow-lg relative mx-4 overflow-y-auto max-h-[90vh]" (click)="$event.stopPropagation()">
+    <div class="text-center mb-4">
+      <h2 class="text-3xl font-bold capitalize text-yellow-600">{{ selectedPokemon.name }}</h2>
+      <p class="text-gray-500 text-xl">#{{ selectedPokemon.id }}</p>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-8">
-      <div class="flex-1 flex items-center justify-center">
-        <img
-          [src]="spriteUrls[currentSpriteIndex]"
-          alt="Imagen de {{ selectedPokemon.name }}"
-          class="w-40 h-40 object-contain"
-        />
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col items-center">
+        <img [src]="spriteUrls[currentSpriteIndex]" alt="Imagen de {{ selectedPokemon.name }}" class="w-48 h-48 object-contain" />
+        <p class="text-sm text-gray-500 mt-2">Galería de Sprites</p>
+
+        <div class="mt-6 w-full">
+          <h4 class="text-lg font-semibold mb-2 text-gray-700 text-center">Estadísticas Base</h4>
+          <app-stats-chart [stats]="selectedPokemon.stats"></app-stats-chart>
+        </div>
       </div>
 
-      <div class="flex-1 flex flex-col items-center justify-center">
+      <div class="flex flex-col">
+        <h4 class="text-lg font-semibold mb-2 text-gray-700">Descripción</h4>
+        <p class="text-gray-600 text-sm mb-4">{{ selectedPokemon.description }}</p>
+        
+        <div class="grid grid-cols-2 gap-4 text-center mb-4">
+          <div class="bg-gray-100 p-3 rounded-lg">
+            <p class="font-bold">Altura</p>
+            <p>{{ selectedPokemon.height / 10 }} m</p>
+          </div>
+          <div class="bg-gray-100 p-3 rounded-lg">
+            <p class="font-bold">Peso</p>
+            <p>{{ selectedPokemon.weight / 10 }} kg</p>
+          </div>
+        </div>
+
         <h4 class="text-lg font-semibold mb-2 text-gray-700">Tipos</h4>
-        <div class="flex flex-wrap gap-2 justify-center">
-          <span
-            *ngFor="let typeInfo of selectedPokemon.types"
-            class="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 font-medium capitalize shadow"
-          >
+        <div class="flex flex-wrap gap-2 justify-start mb-4">
+          <span *ngFor="let typeInfo of selectedPokemon.types" class="px-3 py-1 rounded-full bg-yellow-200 text-yellow-800 font-medium capitalize shadow">
             {{ typeInfo.type.name }}
           </span>
         </div>
+
+        <h4 class="text-lg font-semibold mb-2 text-gray-700">Debilidades</h4>
+        <div class="flex flex-wrap gap-2 justify-start mb-4">
+          <span *ngFor="let weakness of selectedPokemon.weaknesses" class="px-3 py-1 rounded-full bg-red-200 text-red-800 font-medium capitalize shadow">
+            {{ weakness }}
+          </span>
+        </div>
+
+        <h4 class="text-lg font-semibold mb-2 text-gray-700">Habilidades</h4>
+        <div class="flex flex-wrap gap-2 justify-start mb-4">
+          <span *ngFor="let abilityInfo of selectedPokemon.abilities" class="px-3 py-1 rounded-full bg-gray-200 text-gray-800 font-medium capitalize shadow">
+            {{ abilityInfo.ability.name }}
+          </span>
+        </div>
+        
+        <h4 class="text-lg font-semibold mb-2 text-gray-700">Hábitat</h4>
+        <div *ngIf="selectedPokemon.habitat !== 'Desconocido'; else unknownHabitat">
+          <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-medium capitalize shadow">
+            {{ selectedPokemon.habitat }}
+          </span>
+        </div>
+        <ng-template #unknownHabitat>
+          <p class="text-gray-500 text-sm">Desconocido</p>
+        </ng-template>
       </div>
     </div>
   </div>

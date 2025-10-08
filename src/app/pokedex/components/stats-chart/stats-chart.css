@@ -1,0 +1,4 @@
+.chart-container {
+      max-width: 300px; /* Define el tamaño máximo que quieres */
+      margin: 0 auto;   /* Centra el contenedor horizontalmente */
+    }
