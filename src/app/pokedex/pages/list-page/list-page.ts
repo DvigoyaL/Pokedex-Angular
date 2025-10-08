@@ -10,9 +10,9 @@ import StatsChart from '../../components/stats-chart/stats-chart';
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, StatsChart], // Corregido
+  imports: [CommonModule, StatsChart],
   templateUrl: './list-page.html',
-  styleUrl: './list-page.css', // Asegúrate que este archivo exista o usa styleUrls: []
+  styleUrl: './list-page.css',
 })
 export default class ListPage implements OnInit {
   pokemonList: PokemonDetails[] = [];
@@ -143,7 +143,7 @@ loadPokemon() {
     getColorForType(typeName: string): string {
     const colors: { [key: string]: string } = {
       grass: '#A7DB8D',
-      fire: '#F5AC78',
+      fire: '#f1cdb2ff',
       water: '#9DB7F5',
       bug: '#C6D16E',
       normal: '#C6C6A7',
@@ -167,7 +167,7 @@ loadPokemon() {
   // **** AÑADE ESTE MÉTODO QUE FALTA ****
   getTextColor(backgroundColor: string): string {
     if (!backgroundColor || backgroundColor.length < 7) {
-      return '#000000'; // Negro por defecto
+      return '--text-color'; // Negro por defecto
     }
     const r = parseInt(backgroundColor.substr(1, 2), 16);
     const g = parseInt(backgroundColor.substr(3, 2), 16);
@@ -175,7 +175,7 @@ loadPokemon() {
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     
     // Devuelve negro para fondos claros, blanco para fondos oscuros
-    return luminance > 0.6 ? '#000000' : '#FFFFFF';
+    return luminance > 0.6 ? '--text-color' : '#FFFFFF';
   }
 
   closeModal() {
