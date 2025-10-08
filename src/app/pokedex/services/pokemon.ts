@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails } from '../interfaces/pokemon.model';
+import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails, EvolutionChain  } from '../interfaces/pokemon.model';
 
 @Injectable({
   providedIn: 'root',
@@ -25,5 +25,9 @@ export class Pokemon {
 
   getTypeDetails(url: string) {
     return this.http.get<TypeDetails>(url);
+  }
+
+  getEvolutionChain(url: string) {
+    return this.http.get<EvolutionChain>(url);
   }
 }

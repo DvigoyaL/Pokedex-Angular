@@ -27,6 +27,7 @@ export interface PokemonDetails {
   habitat: string | null;
   description: string;
   weaknesses?: string[];
+  evolutionChain?: { name: string, id: string }[];
 }
 
 export interface PokemonDetailsSprites {
@@ -72,6 +73,9 @@ export interface PokemonSpecies {
       name: string;
     };
   }[];
+  evolution_chain: {
+    url: string;
+  };
 }
 
 export interface TypeInfo {
@@ -88,4 +92,16 @@ export interface TypeRelations {
 export interface TypeDetails {
   name: string;
   damage_relations: TypeRelations;
+}
+
+export interface EvolutionChain {
+  chain: ChainLink;
+}
+
+export interface ChainLink {
+  species: {
+    name: string;
+    url: string;
+  };
+  evolves_to: ChainLink[];
 }
