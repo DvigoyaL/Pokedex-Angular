@@ -1,0 +1,15 @@
+<!-- pokemon-basic-card.html -->
+
+<li
+  class="shadow-md rounded-lg p-4 flex flex-col items-center cursor-pointer hover:opacity-80 hover:scale-105 transition"
+  (click)="onCardClick()"
+  [ngStyle]="{ 'background-color': backgroundColor() }"
+>
+  <img
+    [src]="pokemon().sprites.other?.['official-artwork']?.front_default || pokemon().sprites.front_default"
+    alt="Imagen de {{ pokemon().name }}"
+    class="w-24 h-24 object-contain mb-2"
+  />
+  <p class="capitalize font-semibold text-lg text-gray-800">{{ pokemon().name }}</p>
+  <p class="text-gray-500">#{{ pokemon().id }}</p>
+</li>
