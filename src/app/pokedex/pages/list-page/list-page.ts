@@ -9,7 +9,7 @@ import { SearchService } from '../../services/search.service';
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, StatsChart, PokemonBasicCard],
+  imports: [CommonModule, StatsChart ],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
