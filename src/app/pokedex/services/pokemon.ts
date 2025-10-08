@@ -14,8 +14,8 @@ export class Pokemon {
     );
   }
 
-  getPokemonDetailsById(id: string) {
-    const url = `https://pokeapi.co/api/v2/pokemon/${id}/`;
+  getPokemonDetailsByNameOrId(nameOrId: string) {
+    const url = `https://pokeapi.co/api/v2/pokemon/${nameOrId.toLowerCase()}/`;
     return this.http.get<PokemonDetails>(url);
   }
 

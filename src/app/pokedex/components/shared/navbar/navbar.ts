@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { SearchService } from '../../../services/search.service';
 
 interface MenuOption {
   label: string;
@@ -9,7 +10,8 @@ interface MenuOption {
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive], // CommonModule is not needed for standalone components with this setup
   templateUrl: './navbar.html',
   styles: ``,
 })
@@ -26,4 +28,11 @@ export class Navbar {
       route: '/list-page',
     },
   ];
+
+  constructor(private searchService: SearchService) {}
+
+  onSearch(event: Event) {
+    const term = (event.target as HTMLInputElement).value;
+    this.searchService.updateSearchTerm(term);
+  }
 }

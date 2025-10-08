@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails, EvolutionChain, ChainLink } from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
-import { forkJoin, switchMap, catchError, of, map, Observable } from 'rxjs';
+import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
 import StatsChart from '../../components/stats-chart/stats-chart';
+import { SearchService } from '../../services/search.service';
 
 @Component({
   selector: 'pokedex-list-page',
@@ -12,21 +13,27 @@ import StatsChart from '../../components/stats-chart/stats-chart';
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
-export default class ListPage implements OnInit {
+export default class ListPage implements OnInit, OnDestroy {
   pokemonList: PokemonDetails[] = [];
+  allPokemonList: { name: string, url: string }[] = [];
+  filteredPokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
   offset: number = 0;
-  limit: number = 20;
+  limit: number = 21;
   spriteUrls: string[] = [];
   currentSpriteIndex: number = 0;
   private spriteInterval: any;
   isLoading: boolean = false;
   error: string | null = null;
 
-  constructor(private pokemonService: Pokemon) {}
+  private searchSubscription: Subscription | undefined;
+
+  constructor(private pokemonService: Pokemon, private searchService: SearchService) {}
 
   ngOnInit(): void {
+    this.loadAllPokemonNames();
     this.loadPokemon();
+    this.subscribeToSearch();
   }
 
   loadPokemon(): void {
@@ -52,8 +59,58 @@ export default class ListPage implements OnInit {
       )
       .subscribe((detailedPokemons) => {
         this.pokemonList = detailedPokemons as PokemonDetails[];
+        this.filteredPokemonList = this.pokemonList; // Inicialmente, la lista filtrada es la lista completa
         this.isLoading = false;
       });
+  }
+
+  private loadAllPokemonNames(): void {
+    // Carga todos los nombres de Pokémon para la búsqueda. Usamos un límite alto.
+    this.pokemonService.getListPokemon(0, 1500).subscribe(response => {
+      this.allPokemonList = response.results;
+    });
+  }
+
+  private subscribeToSearch(): void {
+    this.searchSubscription = this.searchService.searchTerm$.subscribe(term => {
+      this.onSearch(term);
+    });
+  }
+
+  private onSearch(searchTerm: string): void {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    if (!searchTerm) {
+      this.filteredPokemonList = this.pokemonList;
+      this.error = null;
+      // Habilitar paginación
+    } else {
+      // Deshabilitar paginación y mostrar resultados de búsqueda
+      this.isLoading = true;
+      const matched = this.allPokemonList.filter(pokemon => 
+        pokemon.name.toLowerCase().includes(lowerCaseSearchTerm)
+      ).slice(0, this.limit); // Limitar a los primeros 21 resultados
+
+      if (matched.length === 0) {
+        this.filteredPokemonList = [];
+        this.isLoading = false;
+        this.error = `No se encontraron Pokémon que coincidan con "${searchTerm}".`;
+        return;
+      }
+
+      const detailObservables = matched.map(pokemon =>
+        this.getFullPokemonDetails(pokemon.url)
+      );
+      
+      forkJoin(detailObservables).subscribe(detailedPokemons => {
+        this.filteredPokemonList = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+        this.isLoading = false;
+        this.error = null;
+      });
+    }
+  }
+
+  isSearching(): boolean {
+    return this.filteredPokemonList !== this.pokemonList;
   }
 
   selectPokemon(pokemon: PokemonDetails | { id: string }): void {
@@ -242,5 +299,10 @@ private getCurrentPokemonIndex(): number {
       const nextPokemon = this.pokemonList[currentIndex + 1];
       this.selectPokemon(nextPokemon);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.spriteInterval) clearInterval(this.spriteInterval);
+    this.searchSubscription?.unsubscribe();
   }
 }
