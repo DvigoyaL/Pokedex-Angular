@@ -24,11 +24,14 @@
     <button (click)="onPreviousPage()" [disabled]="offset === 0 || isLoading" class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
       Anterior
     </button>
-    <button (click)="onNextPage()" [disabled]="isLoading" class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
+    <button
+      (click)="onNextPage()"
+      [disabled]="isLoading"
+      class="px-4 py-2 bg-yellow-400 text-white rounded shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       Siguiente
     </button>
   </div>
-</div>
 
 <div *ngIf="selectedPokemon" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-8" (click)="closeModal()">
   
@@ -181,4 +184,5 @@
       &rarr;
     </button>
   </div>
-</div>
+
+}
