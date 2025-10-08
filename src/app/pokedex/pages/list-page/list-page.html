@@ -94,26 +94,26 @@
             <ng-template #unknownHabitat><p class="text-gray-500 text-sm">Desconocido</p></ng-template>
           </div>
           <div>
-<h4 class="text-lg font-semibold mb-2 text-gray-700">Debilidades</h4>
-<div class="flex flex-wrap gap-2 justify-start mb-4">
-  <span 
-    *ngFor="let weakness of selectedPokemon.weaknesses"
-    class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 border-2"
-    [ngStyle]="{
-      'background-color': getColorForType(weakness),
-      'border-color': getColorForType(weakness),
-      'color': getTextColor(getColorForType(weakness))
-    }"
-  >
-    <img 
-      [src]="getTypeIcon(weakness)" 
-      [alt]="weakness" 
-      class="w-4 h-4"
-      [ngStyle]="{'filter': 'brightness(0) invert(1)'}"
-    >
-    {{ weakness }}
-  </span>
-</div>
+            <h4 class="text-lg font-semibold mb-2 text-gray-700">Debilidades</h4>
+            <div class="flex flex-wrap gap-2 justify-start mb-4">
+              <span 
+                *ngFor="let weakness of selectedPokemon.weaknesses"
+                class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 border-2"
+                [ngStyle]="{
+                  'background-color': getColorForType(weakness),
+                  'border-color': getColorForType(weakness),
+                  'color': getTextColor(getColorForType(weakness))
+                }"
+              >
+                <img 
+                  [src]="getTypeIcon(weakness)" 
+                  [alt]="weakness" 
+                  class="w-4 h-4"
+                  [ngStyle]="{'filter': 'brightness(0) invert(1)'}"
+                >
+                {{ weakness }}
+              </span>
+            </div>
 
             <h4 class="text-lg font-semibold mb-2 text-gray-700">Habilidades</h4>
             <div class="flex flex-wrap gap-2 justify-start mb-4">
@@ -126,9 +126,16 @@
           <h4 class="text-lg font-semibold mb-4 text-gray-700 text-center">Evoluciones</h4>
           <div class="flex justify-center items-center gap-2">
             <ng-container *ngFor="let evo of selectedPokemon.evolutionChain; let isLast = last">
-              <div class="flex flex-col items-center text-center">
-                <div class="bg-white bg-opacity-50 rounded-full p-2">
-                  <img [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png'" [alt]="evo.name" class="w-24 h-24">
+              <div 
+                class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition"
+                (click)="selectPokemon(evo)"
+              >
+                <div class="bg-gray-100 rounded-full p-2">
+                  <img 
+                    [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png'" 
+                    [alt]="evo.name" 
+                    class="w-24 h-24"
+                  >
                 </div>
                 <p class="capitalize font-semibold mt-2">{{ evo.name }}</p>
                 <p class="text-sm text-gray-500">#{{ evo.id.padStart(4, '0') }}</p>

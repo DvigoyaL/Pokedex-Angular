@@ -1,6 +1,6 @@
 // src/app/pokedex/components/stats-chart/stats-chart.ts
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 // FIX: Import the directive instead of the module
 import { BaseChartDirective } from 'ng2-charts';
@@ -9,7 +9,6 @@ import { PokemonStat } from '../../interfaces/pokemon.model';
 @Component({
   selector: 'app-stats-chart',
   standalone: true,
-  // FIX: Use the directive in the imports array
   imports: [BaseChartDirective],
   templateUrl: './stats-chart.html',
   styleUrl: './stats-chart.css'
@@ -59,6 +58,31 @@ export default class StatsChart implements OnInit {
         ]
       };
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Este bloque se ejecutará cada vez que 'stats' cambie
+    if (changes['stats'] && this.stats) {
+      this.updateChartData();
+    }
+  }
+
+  private updateChartData(): void {
+    const labels = this.stats.map(stat => this.formatStatName(stat.stat.name));
+    const data = this.stats.map(stat => stat.base_stat);
+
+    this.radarChartData = {
+      labels: labels,
+      datasets: [
+        {
+          data: data,
+          label: 'Estadísticas Base',
+          backgroundColor: 'rgba(251, 191, 36, 0.4)',
+          borderColor: 'rgba(251, 191, 36, 1)',
+          pointBackgroundColor: 'rgba(251, 191, 36, 1)',
+        }
+      ]
+    };
   }
   
   private formatStatName(name: string): string {

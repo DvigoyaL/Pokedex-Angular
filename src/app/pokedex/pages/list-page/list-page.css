@@ -75,8 +75,6 @@
   width: 100%; /* Make the image fit its column */
 }
 
-/* en src/styles.css */
-
 .icon {
   border-radius: 100%;
   display: flex;
@@ -90,7 +88,7 @@
 }
 
 .icon img {
-  filter: brightness(0) invert(1); /* Hace que el SVG se vuelva blanco */
+  filter: brightness(0) invert(1);
   height: 60%;
   width: 60%;
 }

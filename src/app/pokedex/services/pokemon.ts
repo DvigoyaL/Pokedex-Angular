@@ -8,11 +8,15 @@ import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails, Evolu
 export class Pokemon {
   constructor(private http: HttpClient) {}
   
-  // Add 'limit' as a parameter with a default value
   getListPokemon(offset: number, limit: number = 20) {
     return this.http.get<PokemonListResponse>(
       `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
     );
+  }
+
+  getPokemonDetailsById(id: string) {
+    const url = `https://pokeapi.co/api/v2/pokemon/${id}/`;
+    return this.http.get<PokemonDetails>(url);
   }
 
   getPokemonDetails(url: string) {
