@@ -15,6 +15,13 @@
       }
     </ul>
 
+  <pokedex-pokemon-modal-card
+    [pokemon]="selectedPokemon"
+    [pokemonList]="filteredPokemonList"
+    (modalClosed)="closeModal()"
+    (pokemonSelected)="selectPokemon($event)"
+  ></pokedex-pokemon-modal-card>
+
   @if (!isSearching()) {
     <pokedex-pokemon-navigationButtons
       [offset]="offset"
@@ -25,10 +32,4 @@
 
   }
 
-  <pokedex-pokemon-modal-card
-    [pokemon]="selectedPokemon"
-    [pokemonList]="filteredPokemonList"
-    (modalClosed)="closeModal()"
-    (pokemonSelected)="selectPokemon($event)"
-  ></pokedex-pokemon-modal-card>
 }
