@@ -29,10 +29,16 @@ export class Navbar {
     },
   ];
 
+  isMenuOpen = false;
+
   constructor(private searchService: SearchService) {}
 
   onSearch(event: Event) {
     const term = (event.target as HTMLInputElement).value;
     this.searchService.updateSearchTerm(term);
+  }
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
   }
 }
