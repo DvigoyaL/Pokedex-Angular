@@ -73,7 +73,7 @@
         <!-- Height Range -->
         <div class="filter-section">
           <h3 class="text-lg font-bold text-gray-800 mb-3">
-            Height (dm)
+            Height (m)
           </h3>
           <div class="flex gap-2 items-center">
             <div class="flex-1">
@@ -84,6 +84,7 @@
                 (ngModelChange)="onRangeChange()"
                 placeholder="0"
                 min="0"
+                step="0.1"
                 class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
               />
             </div>
@@ -96,17 +97,18 @@
                 (ngModelChange)="onRangeChange()"
                 placeholder="∞"
                 min="0"
+                step="0.1"
                 class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
               />
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-1">1m = 10dm</p>
+          <p class="text-xs text-gray-500 mt-1">e.g. 1.5m = 150cm</p>
         </div>
 
         <!-- Weight Range -->
         <div class="filter-section">
           <h3 class="text-lg font-bold text-gray-800 mb-3">
-            Weight (hg)
+            Weight (kg)
           </h3>
           <div class="flex gap-2 items-center">
             <div class="flex-1">
@@ -117,6 +119,7 @@
                 (ngModelChange)="onRangeChange()"
                 placeholder="0"
                 min="0"
+                step="0.1"
                 class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
               />
             </div>
@@ -129,11 +132,12 @@
                 (ngModelChange)="onRangeChange()"
                 placeholder="∞"
                 min="0"
+                step="0.1"
                 class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
               />
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-1">1kg = 10hg</p>
+          <p class="text-xs text-gray-500 mt-1">e.g. 6.5kg = 6500g</p>
         </div>
       </div>
 

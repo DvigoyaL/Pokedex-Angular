@@ -174,13 +174,15 @@ export default class FiltersPage implements OnInit {
         if (!criteria.generations.includes(generation)) return false;
       }
 
-      // Filtrar por altura
-      if (criteria.minHeight !== undefined && pokemon.height < criteria.minHeight) return false;
-      if (criteria.maxHeight !== undefined && pokemon.height > criteria.maxHeight) return false;
+      // Filtrar por altura (convertir de metros a decímetros para comparar con la API)
+      // API usa decímetros: 1m = 10dm
+      if (criteria.minHeight !== undefined && pokemon.height < criteria.minHeight * 10) return false;
+      if (criteria.maxHeight !== undefined && pokemon.height > criteria.maxHeight * 10) return false;
 
-      // Filtrar por peso
-      if (criteria.minWeight !== undefined && pokemon.weight < criteria.minWeight) return false;
-      if (criteria.maxWeight !== undefined && pokemon.weight > criteria.maxWeight) return false;
+      // Filtrar por peso (convertir de kilogramos a hectogramos para comparar con la API)
+      // API usa hectogramos: 1kg = 10hg
+      if (criteria.minWeight !== undefined && pokemon.weight < criteria.minWeight * 10) return false;
+      if (criteria.maxWeight !== undefined && pokemon.weight > criteria.maxWeight * 10) return false;
 
       // Filtrar por hábitat
       if (criteria.habitats.length > 0) {
