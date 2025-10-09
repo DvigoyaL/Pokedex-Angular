@@ -56,7 +56,7 @@ export class PokemonModalCard implements OnInit, OnDestroy {
     const otherSprites = Object.values(pokemon.sprites.other || {})
       .flatMap((obj) => Object.values(obj))
       .filter((url) => url);
-    this.spriteUrls = [...this.spriteUrls, ...otherSprites];
+    this.spriteUrls = [...this.spriteUrls, ...otherSprites].reverse();
     this.currentSpriteIndex = 0;
 
     if (this.spriteUrls.length > 1) {
