@@ -5,13 +5,26 @@
   class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-8"
   (click)="closeModal()"
 >
+  <!-- Close Button (X) -->
+  <button
+    (click)="closeModal()"
+    class="absolute top-4 right-4 text-white text-3xl font-bold z-50 hover:scale-110 transition bg-black/30 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/50"
+    aria-label="Close modal"
+  >
+    ✕
+  </button>
+
   <div class="relative flex items-center w-full max-w-lg md:max-w-3xl lg:max-w-none lg:w-auto">
+    <!-- Previous Button -->
     <button
       (click)="goToPreviousPokemon($event)"
-      class="absolute left-0 md:-left-12 text-white text-4xl font-bold z-10 hover:scale-110 transition disabled:opacity-25"
+      class="absolute -left-4 md:-left-16 top-1/2 -translate-y-1/2 text-white z-20 hover:scale-110 transition disabled:opacity-25 bg-black/50 rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center"
       [disabled]="!canGoToPrevious()"
+      aria-label="Previous Pokemon"
     >
-      &larr;
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 md:w-10 md:h-10">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
     </button>
 
     <div
@@ -22,24 +35,29 @@
         'background-color': pokemon() ? getColorForType(pokemon()!.types[0].type.name) : ''
       }"
     >
-      <div class="relative text-center mb-4">
-        <h2
-          class="text-3xl font-bold capitalize"
-          [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
-        >
-          {{ pokemon()!.name }}
-        </h2>
-        <p
-          class="text-xl"
-          [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
-        >
-          #{{ pokemon()!.id.toString().padStart(4, '0') }}
-        </p>
+      <!-- Header Section with responsive layout -->
+      <div class="mb-4">
+        <!-- Title and ID -->
+        <div class="text-center mb-3">
+          <h2
+            class="text-2xl sm:text-3xl font-bold capitalize"
+            [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
+          >
+            {{ pokemon()!.name }}
+          </h2>
+          <p
+            class="text-lg sm:text-xl"
+            [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
+          >
+            #{{ pokemon()!.id.toString().padStart(4, '0') }}
+          </p>
+        </div>
 
-        <div class="absolute top-0 right-0 flex gap-2">
+        <!-- Types - Below title on mobile, absolute on larger screens -->
+        <div class="flex gap-2 justify-center sm:absolute sm:top-2 sm:right-2">
           @for (typeInfo of pokemon()!.types; track typeInfo.type.name) {
             <span
-              class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2"
+              class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 text-sm"
               [ngStyle]="{
                 'background-color': getColorForType(typeInfo.type.name),
                 color: getTextColor(getColorForType(typeInfo.type.name))
@@ -194,12 +212,16 @@
       </div>
     </div>
 
+    <!-- Next Button -->
     <button
       (click)="goToNextPokemon($event)"
-      class="absolute right-0 md:-right-12 text-white text-4xl font-bold z-10 hover:scale-110 transition disabled:opacity-25"
+      class="absolute -right-4 md:-right-16 top-1/2 -translate-y-1/2 text-white z-20 hover:scale-110 transition disabled:opacity-25 bg-black/50 rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center"
       [disabled]="!canGoToNext()"
+      aria-label="Next Pokemon"
     >
-      &rarr;
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 md:w-10 md:h-10">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
     </button>
   </div>
 </div>
