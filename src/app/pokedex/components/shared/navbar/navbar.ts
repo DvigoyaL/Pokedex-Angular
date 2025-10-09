@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SearchService } from '../../../services/search.service';
 
 interface MenuOption {
@@ -29,10 +29,24 @@ export class Navbar {
     },
   ];
 
-  constructor(private searchService: SearchService) {}
+  isMenuOpen = false;
+
+  constructor(
+    private searchService: SearchService,
+    private router: Router
+  ) {}
 
   onSearch(event: Event) {
     const term = (event.target as HTMLInputElement).value;
     this.searchService.updateSearchTerm(term);
+
+    // Navigate to list-page if not already there
+    if (this.router.url !== '/list-page') {
+      this.router.navigate(['/list-page']);
+    }
+  }
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
   }
 }

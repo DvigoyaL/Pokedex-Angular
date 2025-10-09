@@ -1,0 +1,43 @@
+<!-- pokemon-evolution-item.html -->
+
+<div
+  class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition"
+  (click)="onEvolutionClick()"
+>
+  <div
+    class="bg-gray-100 rounded-full transition-all duration-300"
+    [ngClass]="{
+      'p-2': totalEvolutions() <= 3,
+      'p-1': totalEvolutions() > 3
+    }"
+  >
+    <img
+      [src]="spriteUrl()"
+      [alt]="evolutionName()"
+      class="transition-all duration-300"
+      [ngClass]="{
+        'w-16 h-25': totalEvolutions() <= 3,
+        'w-14 h-14': totalEvolutions() > 3
+      }"
+    />
+  </div>
+  <p
+    class="capitalize font-semibold mt-1"
+    [ngClass]="{
+      'text-base': totalEvolutions() <= 3,
+      'text-xs': totalEvolutions() > 3
+    }"
+  >
+    {{ evolutionName() }}
+  </p>
+  <p
+    class="text-gray-500"
+    [ngClass]="{
+      'text-sm': totalEvolutions() <= 3,
+      'text-[10px]': totalEvolutions() > 3
+    }"
+  >
+    #{{ evolutionId().padStart(4, '0') }}
+  </p>
+</div>
+

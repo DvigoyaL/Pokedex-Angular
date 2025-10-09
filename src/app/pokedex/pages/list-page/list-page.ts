@@ -1,28 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails, EvolutionChain, ChainLink } from '../../interfaces/pokemon.model';
+import {
+  PokemonDetails,
+  PokemonListResponse,
+  PokemonSpecies,
+  TypeDetails,
+  EvolutionChain,
+  ChainLink,
+} from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
 import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
-import StatsChart from '../../components/stats-chart/stats-chart';
 import { SearchService } from '../../services/search.service';
+import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
+import { NavigationButtons } from '../../components/navigation-buttons/navigation-buttons';
+import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-modal-card';
 
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, StatsChart ],
+  imports: [CommonModule, PokemonBasicCard, NavigationButtons, PokemonModalCard],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
 export default class ListPage implements OnInit, OnDestroy {
   pokemonList: PokemonDetails[] = [];
-  allPokemonList: { name: string, url: string }[] = [];
+  allPokemonList: { name: string; url: string }[] = [];
   filteredPokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
   offset: number = 0;
   limit: number = 21;
-  spriteUrls: string[] = [];
-  currentSpriteIndex: number = 0;
-  private spriteInterval: any;
   isLoading: boolean = false;
   error: string | null = null;
 
@@ -66,13 +72,13 @@ export default class ListPage implements OnInit, OnDestroy {
 
   private loadAllPokemonNames(): void {
     // Carga todos los nombres de Pokémon para la búsqueda. Usamos un límite alto.
-    this.pokemonService.getListPokemon(0, 1500).subscribe(response => {
+    this.pokemonService.getListPokemon(0, 1500).subscribe((response) => {
       this.allPokemonList = response.results;
     });
   }
 
   private subscribeToSearch(): void {
-    this.searchSubscription = this.searchService.searchTerm$.subscribe(term => {
+    this.searchSubscription = this.searchService.searchTerm$.subscribe((term) => {
       this.onSearch(term);
     });
   }
@@ -86,9 +92,9 @@ export default class ListPage implements OnInit, OnDestroy {
     } else {
       // Deshabilitar paginación y mostrar resultados de búsqueda
       this.isLoading = true;
-      const matched = this.allPokemonList.filter(pokemon => 
-        pokemon.name.toLowerCase().includes(lowerCaseSearchTerm)
-      ).slice(0, this.limit); // Limitar a los primeros 21 resultados
+      const matched = this.allPokemonList
+        .filter((pokemon) => pokemon.name.toLowerCase().includes(lowerCaseSearchTerm))
+        .slice(0, this.limit); // Limitar a los primeros 21 resultados
 
       if (matched.length === 0) {
         this.filteredPokemonList = [];
@@ -97,12 +103,10 @@ export default class ListPage implements OnInit, OnDestroy {
         return;
       }
 
-      const detailObservables = matched.map(pokemon =>
-        this.getFullPokemonDetails(pokemon.url)
-      );
-      
-      forkJoin(detailObservables).subscribe(detailedPokemons => {
-        this.filteredPokemonList = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+      const detailObservables = matched.map((pokemon) => this.getFullPokemonDetails(pokemon.url));
+
+      forkJoin(detailObservables).subscribe((detailedPokemons) => {
+        this.filteredPokemonList = detailedPokemons.filter((p) => p !== null) as PokemonDetails[];
         this.isLoading = false;
         this.error = null;
       });
@@ -114,18 +118,15 @@ export default class ListPage implements OnInit, OnDestroy {
   }
 
   selectPokemon(pokemon: PokemonDetails | { id: string }): void {
-    this.isLoading = true; // Muestra carga mientras se actualiza el modal
-    if (this.spriteInterval) {
-      clearInterval(this.spriteInterval);
-    }
+    this.isLoading = true;
 
     const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`;
 
     this.getFullPokemonDetails(pokemonUrl)
       .pipe(
         catchError((error) => {
-          console.error('Falló la carga de detalles del Pokémon seleccionado', error);
-          this.error = 'No se pudieron cargar los detalles de este Pokémon.';
+          console.error('Failed to load selected Pokémon details', error);
+          this.error = 'Could not load the details of this Pokémon.';
           this.closeModal();
           return of(null);
         })
@@ -133,7 +134,6 @@ export default class ListPage implements OnInit, OnDestroy {
       .subscribe((detailedPokemon) => {
         if (detailedPokemon) {
           this.selectedPokemon = detailedPokemon;
-          this.setupSpriteGallery(detailedPokemon);
         }
         this.isLoading = false;
       });
@@ -174,7 +174,7 @@ export default class ListPage implements OnInit, OnDestroy {
 
                 // Aplanamos toda la cadena evolutiva, incluyendo ramificaciones.
                 const evoChain = this.flattenEvolutionChain(evolutionChain.chain);
-                
+
                 return {
                   ...details,
                   habitat: species.habitat?.name || 'Desconocido',
@@ -201,13 +201,13 @@ export default class ListPage implements OnInit, OnDestroy {
 
       // Si hay múltiples evoluciones (como Eevee), las procesamos todas.
       if (currentLink.evolves_to.length > 1) {
-        currentLink.evolves_to.forEach(evo => {
+        currentLink.evolves_to.forEach((evo) => {
           const evoUrlParts = evo.species.url.split('/');
           const evoId = evoUrlParts[evoUrlParts.length - 2];
           chain.push({ name: evo.species.name, id: evoId });
         });
         // Detenemos el bucle principal porque ya hemos añadido todas las ramas.
-        currentLink = undefined; 
+        currentLink = undefined;
       } else {
         // Si es una evolución lineal, simplemente avanzamos.
         currentLink = currentLink.evolves_to[0];
@@ -216,26 +216,8 @@ export default class ListPage implements OnInit, OnDestroy {
     return chain;
   }
 
-  private setupSpriteGallery(pokemon: PokemonDetails): void {
-    this.spriteUrls = Object.values(pokemon.sprites).filter((val) => typeof val === 'string');
-    const otherSprites = Object.values(pokemon.sprites.other || {})
-      .flatMap((obj) => Object.values(obj))
-      .filter((url) => url);
-    this.spriteUrls = [...this.spriteUrls, ...otherSprites];
-    this.currentSpriteIndex = 0;
-
-    if (this.spriteUrls.length > 1) {
-      this.spriteInterval = setInterval(() => {
-        this.currentSpriteIndex = (this.currentSpriteIndex + 1) % this.spriteUrls.length;
-      }, 1000);
-    }
-  }
-
   closeModal(): void {
     this.selectedPokemon = null;
-    if (this.spriteInterval) {
-      clearInterval(this.spriteInterval);
-    }
   }
 
   onPreviousPage(): void {
@@ -274,57 +256,7 @@ export default class ListPage implements OnInit, OnDestroy {
     return colors[typeName.toLowerCase()] || '#C6C6A7';
   }
 
-  getTextColor(backgroundColor: string): string {
-    if (!backgroundColor || backgroundColor.length < 7) return '#000000';
-    const r = parseInt(backgroundColor.substr(1, 2), 16);
-    const g = parseInt(backgroundColor.substr(3, 2), 16);
-    const b = parseInt(backgroundColor.substr(5, 2), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.6 ? '#000000' : '#FFFFFF';
-  }
-
-  getTypeIcon(typeName: string): string {
-    return `assets/icons/types/${typeName.toLowerCase()}.svg`;
-  }
-
-private getCurrentPokemonIndex(): number {
-    if (!this.selectedPokemon) return -1;
-    return this.pokemonList.findIndex(p => p.id === this.selectedPokemon!.id);
-  }
-
-  // Comprueba si se puede ir al Pokémon anterior
-  canGoToPrevious(): boolean {
-    return this.getCurrentPokemonIndex() > 0;
-  }
-
-  // Comprueba si se puede ir al siguiente Pokémon
-  canGoToNext(): boolean {
-    const currentIndex = this.getCurrentPokemonIndex();
-    return currentIndex > -1 && currentIndex < this.pokemonList.length - 1;
-  }
-
-  // Navega al Pokémon anterior en la lista
-  goToPreviousPokemon(event: MouseEvent): void {
-    event.stopPropagation(); // Evita que se cierre el modal
-    if (this.canGoToPrevious()) {
-      const currentIndex = this.getCurrentPokemonIndex();
-      const previousPokemon = this.pokemonList[currentIndex - 1];
-      this.selectPokemon(previousPokemon);
-    }
-  }
-
-  // Navega al siguiente Pokémon en la lista
-  goToNextPokemon(event: MouseEvent): void {
-    event.stopPropagation(); // Evita que se cierre el modal
-    if (this.canGoToNext()) {
-      const currentIndex = this.getCurrentPokemonIndex();
-      const nextPokemon = this.pokemonList[currentIndex + 1];
-      this.selectPokemon(nextPokemon);
-    }
-  }
-
   ngOnDestroy(): void {
-    if (this.spriteInterval) clearInterval(this.spriteInterval);
     this.searchSubscription?.unsubscribe();
   }
 }

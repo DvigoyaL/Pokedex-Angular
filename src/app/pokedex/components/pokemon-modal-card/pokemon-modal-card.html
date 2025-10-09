@@ -1,0 +1,174 @@
+<!-- pokemon-modal-card.html -->
+
+@if (pokemon()) {
+<div
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-8"
+  (click)="closeModal()"
+>
+  <!-- Close Button (X) -->
+  <button
+    (click)="closeModal()"
+    class="absolute top-4 right-4 text-white text-3xl font-bold z-50 hover:scale-110 transition bg-black/30 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/50"
+    aria-label="Close modal"
+  >
+    ✕
+  </button>
+
+  <div class="relative flex items-center w-full max-w-lg md:max-w-3xl lg:max-w-none lg:w-auto">
+    <!-- Previous Button -->
+    <button
+      (click)="goToPreviousPokemon($event)"
+      class="absolute -left-4 md:-left-16 top-1/2 -translate-y-1/2 text-white z-20 hover:scale-110 transition disabled:opacity-25 bg-black/50 rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center"
+      [disabled]="!canGoToPrevious()"
+      aria-label="Previous Pokemon"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 md:w-10 md:h-10">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    </button>
+
+    <div
+      class="rounded-lg p-4 md:p-6 w-full mx-4 sm:mx-0 shadow-lg relative overflow-y-auto max-h-[90vh]"
+      style="max-width: 950px"
+      (click)="$event.stopPropagation()"
+      [ngStyle]="{
+        'background-color': pokemon() ? getColorForType(pokemon()!.types[0].type.name) : ''
+      }"
+    >
+      <!-- Header Section with responsive layout -->
+      <div class="mb-4">
+        <!-- Title and ID -->
+        <div class="text-center mb-3">
+          <h2
+            class="text-2xl sm:text-3xl font-bold capitalize"
+            [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
+          >
+            {{ pokemon()!.name }}
+          </h2>
+          <p
+            class="text-lg sm:text-xl"
+            [ngStyle]="{ color: getTextColor(getColorForType(pokemon()!.types[0].type.name)) }"
+          >
+            #{{ pokemon()!.id.toString().padStart(4, '0') }}
+          </p>
+        </div>
+
+        <!-- Types - Below title on mobile, absolute on larger screens -->
+        <div class="flex gap-2 justify-center sm:absolute sm:top-2 sm:right-2">
+          @for (typeInfo of pokemon()!.types; track typeInfo.type.name) {
+            <pokemon-type-badge
+              [typeName]="typeInfo.type.name"
+              [backgroundColor]="getColorForType(typeInfo.type.name)"
+              [textColor]="getTextColor(getColorForType(typeInfo.type.name))"
+              [typeIcon]="getTypeIcon(typeInfo.type.name)"
+            />
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+          <div class="flex flex-col items-center">
+            <img
+              [src]="spriteUrls[currentSpriteIndex]"
+              alt="Image of {{ pokemon()!.name }}"
+              class="w-48 h-48 object-contain"
+            />
+            <p class="text-sm text-gray-500 mt-2">Sprite Gallery</p>
+          </div>
+          <div class="w-full">
+            <h4 class="text-lg font-semibold mb-2 text-gray-700 text-center">Base Stats</h4>
+            <app-stats-chart [stats]="pokemon()!.stats"></app-stats-chart>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <div>
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Description</h4>
+              <p class="text-gray-600 text-sm mb-4">{{ pokemon()!.description }}</p>
+
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Attributes</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
+                  >Height: {{ pokemon()!.height / 10 }} m</span
+                >
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 text-gray-800 font-medium shadow"
+                  >Weight: {{ pokemon()!.weight / 10 }} kg</span
+                >
+              </div>
+
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Habitat</h4>
+              @if (pokemon()!.habitat !== 'Desconocido') {
+              <div>
+                <span
+                  class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
+                  >{{ pokemon()!.habitat }}</span
+                >
+              </div>
+              } @else {
+              <p class="text-gray-500 text-sm">Unknown</p>
+              }
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Weaknesses</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                @for (weakness of pokemon()!.weaknesses; track weakness) {
+                  <pokemon-weakness-badge
+                    [weakness]="weakness"
+                    [backgroundColor]="getColorForType(weakness)"
+                    [textColor]="getTextColor(getColorForType(weakness))"
+                    [typeIcon]="getTypeIcon(weakness)"
+                  />
+                }
+              </div>
+
+              <h4 class="text-lg font-semibold mb-2 text-gray-700">Abilities</h4>
+              <div class="flex flex-wrap gap-2 justify-start mb-4">
+                @for (abilityInfo of pokemon()!.abilities; track abilityInfo.ability.name) {
+                  <pokemon-ability-badge [abilityName]="abilityInfo.ability.name" />
+                }
+              </div>
+            </div>
+          </div>
+
+          @if (pokemon()!.evolutionChain && pokemon()!.evolutionChain!.length > 0) {
+            <div class="mt-6 border-t pt-4">
+              <h4 class="text-lg font-semibold mb-4 text-gray-700 text-center">Evolutions</h4>
+              <div class="flex flex-wrap justify-center items-center gap-2 md:gap-4">
+                @for (evo of pokemon()!.evolutionChain!; track evo.id; let isLast = $last) {
+                  <pokemon-evolution-item
+                    [evolutionName]="evo.name"
+                    [evolutionId]="evo.id"
+                    [spriteUrl]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png'"
+                    [totalEvolutions]="pokemon()!.evolutionChain!.length"
+                    (evolutionClicked)="onEvolutionClick($event)"
+                  />
+                  @if (!isLast && pokemon()!.evolutionChain!.length <= 3) {
+                    <div class="text-2xl text-gray-400 mx-4">&rarr;</div>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <button
+      (click)="goToNextPokemon($event)"
+      class="absolute -right-4 md:-right-16 top-1/2 -translate-y-1/2 text-white z-20 hover:scale-110 transition disabled:opacity-25 bg-black/50 rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center"
+      [disabled]="!canGoToNext()"
+      aria-label="Next Pokemon"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 md:w-10 md:h-10">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
+  </div>
+</div>
+}
+

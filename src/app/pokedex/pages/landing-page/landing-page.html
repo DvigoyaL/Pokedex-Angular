@@ -5,8 +5,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 80vh;
+    height: calc(100vh - 64px);
     background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
   "
 >
   <img
@@ -29,7 +32,7 @@
     Este proyecto fue creado para aprender desarrollo web usando
     <span style="color: #e53935; font-weight: bold">Angular</span> y la
     <span style="color: #1976d2; font-weight: bold">API de Pokédex</span>. Aquí puedes explorar y
-    buscar tus Pokémon favoritos, ver sus detalles y practicar tus habilidades de programación.
+    buscar tus Pokémon favoritos y ver sus detalles.
   </p>
   <div style="display: flex; gap: 20px">
     <a
@@ -66,7 +69,56 @@
       Ver la API
     </a>
   </div>
-  <footer style="margin-top: 48px; color: #888; font-size: 0.95rem">
-    Hecho con ❤️ para aprender Angular y desarrollo web.
-  </footer>
 </div>
+<footer
+  style="
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    background: transparent;
+    margin-top: 0;
+    color: #888;
+    font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    padding-bottom: 20px;
+    padding-top: 18px;
+    z-index: 50;
+    pointer-events: none;
+    box-sizing: border-box;
+  "
+>
+  <div style="pointer-events: auto;">
+    Hecho con ❤️ para aprender Angular y desarrollo web.
+  </div>
+  <div style="display: flex; gap: 18px; justify-content: center; align-items: center; margin-top: 4px; pointer-events: auto;">
+    <a
+      href="https://github.com/DvigoyaL"
+      target="_blank"
+      style="display: flex; align-items: center; color: #888; text-decoration: none; gap: 6px; font-weight: 500;"
+    >
+      <img
+        src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg"
+        alt="GitHub"
+        style="width: 20px; height: 20px; vertical-align: middle;"
+      />
+      David Vigoya
+    </a>
+    <a
+      href="https://github.com/RonyTrespalacios"
+      target="_blank"
+      style="display: flex; align-items: center; color: #888; text-decoration: none; gap: 6px; font-weight: 500;"
+    >
+      <img
+        src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg"
+        alt="GitHub"
+        style="width: 20px; height: 20px; vertical-align: middle;"
+      />
+      Rony Trespalacios
+    </a>
+  </div>
+</footer>
