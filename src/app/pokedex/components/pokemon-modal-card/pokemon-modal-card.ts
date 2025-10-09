@@ -4,11 +4,22 @@ import { Component, input, output, OnInit, OnDestroy, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { PokemonDetails } from '../../interfaces/pokemon.model';
 import StatsChart from '../stats-chart/stats-chart';
+import { PokemonTypeBadge } from './pokemon-type-badge/pokemon-type-badge';
+import { PokemonWeaknessBadge } from './pokemon-weakness-badge/pokemon-weakness-badge';
+import { PokemonAbilityBadge } from './pokemon-ability-badge/pokemon-ability-badge';
+import { PokemonEvolutionItem } from './pokemon-evolution-item/pokemon-evolution-item';
 
 @Component({
   selector: 'pokedex-pokemon-modal-card',
   standalone: true,
-  imports: [CommonModule, StatsChart],
+  imports: [
+    CommonModule,
+    StatsChart,
+    PokemonTypeBadge,
+    PokemonWeaknessBadge,
+    PokemonAbilityBadge,
+    PokemonEvolutionItem
+  ],
   templateUrl: './pokemon-modal-card.html',
   styles: ``,
 })

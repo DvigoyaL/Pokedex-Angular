@@ -56,22 +56,12 @@
         <!-- Types - Below title on mobile, absolute on larger screens -->
         <div class="flex gap-2 justify-center sm:absolute sm:top-2 sm:right-2">
           @for (typeInfo of pokemon()!.types; track typeInfo.type.name) {
-            <span
-              class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 text-sm"
-              [ngStyle]="{
-                'background-color': getColorForType(typeInfo.type.name),
-                color: getTextColor(getColorForType(typeInfo.type.name))
-              }"
-            >
-              <div class="rounded-full p-0.5">
-                <img
-                  [src]="getTypeIcon(typeInfo.type.name)"
-                  [alt]="typeInfo.type.name"
-                  class="w-5 h-5"
-                />
-              </div>
-              {{ typeInfo.type.name }}
-            </span>
+            <pokemon-type-badge
+              [typeName]="typeInfo.type.name"
+              [backgroundColor]="getColorForType(typeInfo.type.name)"
+              [textColor]="getTextColor(getColorForType(typeInfo.type.name))"
+              [typeIcon]="getTypeIcon(typeInfo.type.name)"
+            />
           }
         </div>
       </div>
@@ -126,27 +116,19 @@
               <h4 class="text-lg font-semibold mb-2 text-gray-700">Weaknesses</h4>
               <div class="flex flex-wrap gap-2 justify-start mb-4">
                 @for (weakness of pokemon()!.weaknesses; track weakness) {
-                  <span
-                    class="px-3 py-1 rounded-full font-medium capitalize shadow flex items-center gap-2 border-2"
-                    [ngStyle]="{
-                      'background-color': getColorForType(weakness),
-                      'border-color': getColorForType(weakness),
-                      color: getTextColor(getColorForType(weakness))
-                    }"
-                  >
-                    <img [src]="getTypeIcon(weakness)" [alt]="weakness" class="w-4 h-4" />
-                    {{ weakness }}
-                  </span>
+                  <pokemon-weakness-badge
+                    [weakness]="weakness"
+                    [backgroundColor]="getColorForType(weakness)"
+                    [textColor]="getTextColor(getColorForType(weakness))"
+                    [typeIcon]="getTypeIcon(weakness)"
+                  />
                 }
               </div>
 
               <h4 class="text-lg font-semibold mb-2 text-gray-700">Abilities</h4>
               <div class="flex flex-wrap gap-2 justify-start mb-4">
                 @for (abilityInfo of pokemon()!.abilities; track abilityInfo.ability.name) {
-                  <span
-                    class="px-3 py-1 rounded-full bg-white bg-opacity-50 font-medium capitalize shadow"
-                    >{{ abilityInfo.ability.name }}</span
-                  >
+                  <pokemon-ability-badge [abilityName]="abilityInfo.ability.name" />
                 }
               </div>
             </div>
@@ -156,55 +138,18 @@
             <div class="mt-6 border-t pt-4">
               <h4 class="text-lg font-semibold mb-4 text-gray-700 text-center">Evolutions</h4>
               <div class="flex flex-wrap justify-center items-center gap-2 md:gap-4">
-              @for (evo of pokemon()!.evolutionChain!; track evo.id; let isLast = $last) {
-                <div
-                  class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition"
-                  (click)="onEvolutionClick(evo)"
-                >
-                  <div
-                    class="bg-gray-100 rounded-full transition-all duration-300"
-                    [ngClass]="{
-                      'p-2': pokemon()!.evolutionChain!.length <= 3,
-                      'p-1': pokemon()!.evolutionChain!.length > 3
-                    }"
-                  >
-                    <img
-                      [src]="
-                        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' +
-                        evo.id +
-                        '.png'
-                      "
-                      [alt]="evo.name"
-                      class="transition-all duration-300"
-                      [ngClass]="{
-                        'w-16 h-25': pokemon()!.evolutionChain!.length <= 3,
-                        'w-14 h-14': pokemon()!.evolutionChain!.length > 3
-                      }"
-                    />
-                  </div>
-                  <p
-                    class="capitalize font-semibold mt-1"
-                    [ngClass]="{
-                      'text-base': pokemon()!.evolutionChain!.length <= 3,
-                      'text-xs': pokemon()!.evolutionChain!.length > 3
-                    }"
-                  >
-                    {{ evo.name }}
-                  </p>
-                  <p
-                    class="text-gray-500"
-                    [ngClass]="{
-                      'text-sm': pokemon()!.evolutionChain!.length <= 3,
-                      'text-[10px]': pokemon()!.evolutionChain!.length > 3
-                    }"
-                  >
-                    #{{ evo.id.padStart(4, '0') }}
-                  </p>
-                </div>
-                @if (!isLast && pokemon()!.evolutionChain!.length <= 3) {
-                  <div class="text-2xl text-gray-400 mx-4">&rarr;</div>
+                @for (evo of pokemon()!.evolutionChain!; track evo.id; let isLast = $last) {
+                  <pokemon-evolution-item
+                    [evolutionName]="evo.name"
+                    [evolutionId]="evo.id"
+                    [spriteUrl]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + evo.id + '.png'"
+                    [totalEvolutions]="pokemon()!.evolutionChain!.length"
+                    (evolutionClicked)="onEvolutionClick($event)"
+                  />
+                  @if (!isLast && pokemon()!.evolutionChain!.length <= 3) {
+                    <div class="text-2xl text-gray-400 mx-4">&rarr;</div>
+                  }
                 }
-              }
               </div>
             </div>
           }
