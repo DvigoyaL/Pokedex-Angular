@@ -1,22 +1,30 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { PokemonDetails, PokemonListResponse, PokemonSpecies, TypeDetails, EvolutionChain, ChainLink } from '../../interfaces/pokemon.model';
+import {
+  PokemonDetails,
+  PokemonListResponse,
+  PokemonSpecies,
+  TypeDetails,
+  EvolutionChain,
+  ChainLink,
+} from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
 import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
 import StatsChart from '../../components/stats-chart/stats-chart';
 import { SearchService } from '../../services/search.service';
-import { PokemonBasicCard } from "../../components/pokemon-basic-card/pokemon-basic-card";
+import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
+import { NavigationButtons } from '../../components/navigation-buttons/navigation-buttons';
 
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, StatsChart, PokemonBasicCard],
+  imports: [CommonModule, StatsChart, PokemonBasicCard, NavigationButtons],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
 export default class ListPage implements OnInit, OnDestroy {
   pokemonList: PokemonDetails[] = [];
-  allPokemonList: { name: string, url: string }[] = [];
+  allPokemonList: { name: string; url: string }[] = [];
   filteredPokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
   offset: number = 0;
@@ -67,13 +75,13 @@ export default class ListPage implements OnInit, OnDestroy {
 
   private loadAllPokemonNames(): void {
     // Carga todos los nombres de Pokémon para la búsqueda. Usamos un límite alto.
-    this.pokemonService.getListPokemon(0, 1500).subscribe(response => {
+    this.pokemonService.getListPokemon(0, 1500).subscribe((response) => {
       this.allPokemonList = response.results;
     });
   }
 
   private subscribeToSearch(): void {
-    this.searchSubscription = this.searchService.searchTerm$.subscribe(term => {
+    this.searchSubscription = this.searchService.searchTerm$.subscribe((term) => {
       this.onSearch(term);
     });
   }
@@ -87,9 +95,9 @@ export default class ListPage implements OnInit, OnDestroy {
     } else {
       // Deshabilitar paginación y mostrar resultados de búsqueda
       this.isLoading = true;
-      const matched = this.allPokemonList.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(lowerCaseSearchTerm)
-      ).slice(0, this.limit); // Limitar a los primeros 21 resultados
+      const matched = this.allPokemonList
+        .filter((pokemon) => pokemon.name.toLowerCase().includes(lowerCaseSearchTerm))
+        .slice(0, this.limit); // Limitar a los primeros 21 resultados
 
       if (matched.length === 0) {
         this.filteredPokemonList = [];
@@ -98,12 +106,10 @@ export default class ListPage implements OnInit, OnDestroy {
         return;
       }
 
-      const detailObservables = matched.map(pokemon =>
-        this.getFullPokemonDetails(pokemon.url)
-      );
+      const detailObservables = matched.map((pokemon) => this.getFullPokemonDetails(pokemon.url));
 
-      forkJoin(detailObservables).subscribe(detailedPokemons => {
-        this.filteredPokemonList = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+      forkJoin(detailObservables).subscribe((detailedPokemons) => {
+        this.filteredPokemonList = detailedPokemons.filter((p) => p !== null) as PokemonDetails[];
         this.isLoading = false;
         this.error = null;
       });
@@ -202,7 +208,7 @@ export default class ListPage implements OnInit, OnDestroy {
 
       // Si hay múltiples evoluciones (como Eevee), las procesamos todas.
       if (currentLink.evolves_to.length > 1) {
-        currentLink.evolves_to.forEach(evo => {
+        currentLink.evolves_to.forEach((evo) => {
           const evoUrlParts = evo.species.url.split('/');
           const evoId = evoUrlParts[evoUrlParts.length - 2];
           chain.push({ name: evo.species.name, id: evoId });
@@ -288,9 +294,9 @@ export default class ListPage implements OnInit, OnDestroy {
     return `assets/icons/types/${typeName.toLowerCase()}.svg`;
   }
 
-private getCurrentPokemonIndex(): number {
+  private getCurrentPokemonIndex(): number {
     if (!this.selectedPokemon) return -1;
-    return this.pokemonList.findIndex(p => p.id === this.selectedPokemon!.id);
+    return this.pokemonList.findIndex((p) => p.id === this.selectedPokemon!.id);
   }
 
   // Comprueba si se puede ir al Pokémon anterior
