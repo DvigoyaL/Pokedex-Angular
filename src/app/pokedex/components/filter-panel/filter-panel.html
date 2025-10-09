@@ -1,0 +1,157 @@
+<div class="h-full">
+  <!-- Filter Content -->
+  <div class="p-6 space-y-6">
+      <!-- Types Filter -->
+      <div class="filter-section">
+        <h3 class="text-lg font-bold text-gray-800 mb-3">
+          Type
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          @for (type of typeOptions; track type.value) {
+            <button
+              (click)="toggleType(type)"
+              [style.background-color]="type.selected ? getTypeColor(type.value) : '#f3f4f6'"
+              [style.color]="type.selected ? '#000' : '#6b7280'"
+              class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              [class.border-gray-300]="!type.selected"
+              [class.border-gray-700]="type.selected"
+            >
+              {{ type.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Generations Filter -->
+      <div class="filter-section">
+        <h3 class="text-lg font-bold text-gray-800 mb-3">
+          Generation
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          @for (gen of generationOptions; track gen.value) {
+            <button
+              (click)="toggleGeneration(gen)"
+              [class.bg-blue-500]="gen.selected"
+              [class.text-white]="gen.selected"
+              [class.bg-gray-100]="!gen.selected"
+              [class.text-gray-700]="!gen.selected"
+              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              [class.border-blue-600]="gen.selected"
+              [class.border-gray-300]="!gen.selected"
+            >
+              {{ gen.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Habitat Filter -->
+      <div class="filter-section">
+        <h3 class="text-lg font-bold text-gray-800 mb-3">
+          Habitat
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          @for (habitat of habitatOptions; track habitat.value) {
+            <button
+              (click)="toggleHabitat(habitat)"
+              [class.bg-green-500]="habitat.selected"
+              [class.text-white]="habitat.selected"
+              [class.bg-gray-100]="!habitat.selected"
+              [class.text-gray-700]="!habitat.selected"
+              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              [class.border-green-600]="habitat.selected"
+              [class.border-gray-300]="!habitat.selected"
+            >
+              {{ habitat.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Height and Weight Ranges -->
+      <div class="space-y-6">
+        <!-- Height Range -->
+        <div class="filter-section">
+          <h3 class="text-lg font-bold text-gray-800 mb-3">
+            Height (m)
+          </h3>
+          <div class="flex gap-2 items-center">
+            <div class="flex-1">
+              <label class="block text-xs text-gray-600 mb-1">Min</label>
+              <input
+                type="number"
+                [(ngModel)]="minHeight"
+                (ngModelChange)="onRangeChange()"
+                placeholder="0"
+                min="0"
+                step="0.1"
+                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+              />
+            </div>
+            <span class="text-gray-500 mt-5">-</span>
+            <div class="flex-1">
+              <label class="block text-xs text-gray-600 mb-1">Max</label>
+              <input
+                type="number"
+                [(ngModel)]="maxHeight"
+                (ngModelChange)="onRangeChange()"
+                placeholder="∞"
+                min="0"
+                step="0.1"
+                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+              />
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">e.g. 1.5m = 150cm</p>
+        </div>
+
+        <!-- Weight Range -->
+        <div class="filter-section">
+          <h3 class="text-lg font-bold text-gray-800 mb-3">
+            Weight (kg)
+          </h3>
+          <div class="flex gap-2 items-center">
+            <div class="flex-1">
+              <label class="block text-xs text-gray-600 mb-1">Min</label>
+              <input
+                type="number"
+                [(ngModel)]="minWeight"
+                (ngModelChange)="onRangeChange()"
+                placeholder="0"
+                min="0"
+                step="0.1"
+                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+              />
+            </div>
+            <span class="text-gray-500 mt-5">-</span>
+            <div class="flex-1">
+              <label class="block text-xs text-gray-600 mb-1">Max</label>
+              <input
+                type="number"
+                [(ngModel)]="maxWeight"
+                (ngModelChange)="onRangeChange()"
+                placeholder="∞"
+                min="0"
+                step="0.1"
+                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+              />
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">e.g. 6.5kg = 6500g</p>
+        </div>
+      </div>
+
+      <!-- Clear Filters Button -->
+      @if (hasActiveFilters) {
+        <div class="pt-4 border-t border-gray-200">
+          <button
+            (click)="clearAllFilters()"
+            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded shadow transition-colors duration-200"
+          >
+            Clear Filters
+          </button>
+        </div>
+      }
+  </div>
+</div>
+

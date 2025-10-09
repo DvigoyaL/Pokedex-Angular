@@ -1,0 +1,61 @@
+<div class="flex min-h-screen">
+  <!-- Sidebar with Filters -->
+  <aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto sticky top-0 h-screen">
+    <app-filter-panel (filterChange)="onFilterChange($event)"></app-filter-panel>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1">
+    <!-- Loading State -->
+    @if (isLoading && isInitialLoad) {
+      <div class="text-center my-8">
+        <p class="text-xl text-gray-600">Loading Pokémon...</p>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-8 mt-4">
+        <p class="font-medium">{{ error }}</p>
+      </div>
+    }
+
+    <!-- Results -->
+    @if (!isLoading || !isInitialLoad) {
+      @if (displayedPokemonList.length > 0) {
+        <ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 p-8">
+          @for (pokemon of displayedPokemonList; track pokemon.id) {
+            <pokedex-pokemon-basic-card
+              [pokemon]="pokemon"
+              [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+              (cardClicked)="selectPokemon($event)"
+            />
+          }
+        </ul>
+
+        <!-- Navigation Buttons -->
+        <pokedex-pokemon-navigationButtons
+          [offset]="currentPage * itemsPerPage"
+          [isLoading]="isLoading"
+          (previousClicked)="onPreviousPage()"
+          (nextClicked)="onNextPage()"
+        />
+      } @else {
+        <div class="text-center py-20">
+          <p class="text-xl text-gray-600">No Pokémon found with the selected filters</p>
+        </div>
+      }
+    }
+  </main>
+</div>
+
+<!-- Modal for Pokemon Details -->
+@if (selectedPokemon) {
+  <pokedex-pokemon-modal-card
+    [pokemon]="selectedPokemon"
+    [pokemonList]="displayedPokemonList"
+    (modalClosed)="closeModal()"
+    (pokemonSelected)="selectPokemon($event)"
+  />
+}
+

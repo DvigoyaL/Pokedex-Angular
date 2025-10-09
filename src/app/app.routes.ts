@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pokedex/pages/list-page/list-page'),
   },
   {
+    path: 'filters-page',
+    loadComponent: () => import('./pokedex/pages/filters-page/filters-page'),
+  },
+  {
     path: '**',
     redirectTo: 'landing-page',
   },

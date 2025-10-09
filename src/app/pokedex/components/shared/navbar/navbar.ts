@@ -19,13 +19,18 @@ export class Navbar {
   menuOptions: MenuOption[] = [
     {
       label: 'Home',
-      hoverLabel: 'Gifs populares',
+      hoverLabel: 'Página principal',
       route: '/landing-page',
     },
     {
       label: 'List',
-      hoverLabel: 'Buscador de gifs',
+      hoverLabel: 'Lista de Pokémon',
       route: '/list-page',
+    },
+    {
+      label: 'Filters',
+      hoverLabel: 'Búsqueda avanzada',
+      route: '/filters-page',
     },
   ];
 
