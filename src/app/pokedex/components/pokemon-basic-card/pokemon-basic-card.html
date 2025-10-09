@@ -11,5 +11,5 @@
     class="w-24 h-24 object-contain mb-2"
   />
   <p class="capitalize font-semibold text-lg text-gray-800">{{ pokemon().name }}</p>
-  <p class="text-gray-500">#{{ pokemon().id }}</p>
+  <p class="text-gray-500">#{{ pokemon().id.toString().padStart(4, '0') }}</p>
 </li>

@@ -5,11 +5,12 @@ import { Pokemon } from '../../services/pokemon';
 import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
 import StatsChart from '../../components/stats-chart/stats-chart';
 import { SearchService } from '../../services/search.service';
+import { PokemonBasicCard } from "../../components/pokemon-basic-card/pokemon-basic-card";
 
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, StatsChart ],
+  imports: [CommonModule, StatsChart, PokemonBasicCard],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
@@ -86,7 +87,7 @@ export default class ListPage implements OnInit, OnDestroy {
     } else {
       // Deshabilitar paginación y mostrar resultados de búsqueda
       this.isLoading = true;
-      const matched = this.allPokemonList.filter(pokemon => 
+      const matched = this.allPokemonList.filter(pokemon =>
         pokemon.name.toLowerCase().includes(lowerCaseSearchTerm)
       ).slice(0, this.limit); // Limitar a los primeros 21 resultados
 
@@ -100,7 +101,7 @@ export default class ListPage implements OnInit, OnDestroy {
       const detailObservables = matched.map(pokemon =>
         this.getFullPokemonDetails(pokemon.url)
       );
-      
+
       forkJoin(detailObservables).subscribe(detailedPokemons => {
         this.filteredPokemonList = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
         this.isLoading = false;
@@ -174,7 +175,7 @@ export default class ListPage implements OnInit, OnDestroy {
 
                 // Aplanamos toda la cadena evolutiva, incluyendo ramificaciones.
                 const evoChain = this.flattenEvolutionChain(evolutionChain.chain);
-                
+
                 return {
                   ...details,
                   habitat: species.habitat?.name || 'Desconocido',
@@ -207,7 +208,7 @@ export default class ListPage implements OnInit, OnDestroy {
           chain.push({ name: evo.species.name, id: evoId });
         });
         // Detenemos el bucle principal porque ya hemos añadido todas las ramas.
-        currentLink = undefined; 
+        currentLink = undefined;
       } else {
         // Si es una evolución lineal, simplemente avanzamos.
         currentLink = currentLink.evolves_to[0];
