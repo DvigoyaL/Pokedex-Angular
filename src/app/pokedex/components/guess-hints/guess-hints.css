@@ -1,0 +1,59 @@
+.hints-container {
+  min-height: 300px;
+}
+
+.hint-item {
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
+}
+
+.hint-item.locked {
+  opacity: 0.6;
+}
+
+.hint-item.unlocked {
+  animation: unlockHint 0.5s ease-out;
+  background-color: #fff9e6;
+  border-left: 4px solid #fbc02d;
+}
+
+.hint-label {
+  display: block;
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+
+.hint-value {
+  display: block;
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.type-badge {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes unlockHint {
+  0% {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.letter-spacing {
+  letter-spacing: 0.15em;
+  font-family: 'Courier New', monospace;
+}
+

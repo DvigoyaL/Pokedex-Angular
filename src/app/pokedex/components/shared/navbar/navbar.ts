@@ -28,9 +28,19 @@ export class Navbar {
       route: '/list-page',
     },
     {
+      label: 'Favs',
+      hoverLabel: 'Pokémon favoritos',
+      route: '/favorites-page',
+    },
+    {
       label: 'Filters',
       hoverLabel: 'Búsqueda avanzada',
       route: '/filters-page',
+    },
+    {
+      label: 'Guess',
+      hoverLabel: 'Guess the Pokémon',
+      route: '/guess-page',
     },
   ];
 
