@@ -32,6 +32,11 @@ export class Navbar {
       hoverLabel: 'Búsqueda avanzada',
       route: '/filters-page',
     },
+    {
+      label: 'Guess',
+      hoverLabel: 'Guess the Pokémon',
+      route: '/guess-page',
+    },
   ];
 
   isMenuOpen = false;

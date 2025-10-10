@@ -1,7 +1,8 @@
-import { Component, output } from '@angular/core';
+import { Component, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterCriteria } from '../../pages/filters-page/filters-page';
+import { PokemonUtilsService } from '../../services/pokemon-utils.service';
 
 interface FilterOption {
   value: string;
@@ -17,6 +18,8 @@ interface FilterOption {
   styleUrls: ['./filter-panel.css'],
 })
 export class FilterPanel {
+  private pokemonUtils = inject(PokemonUtilsService);
+
   filterChange = output<FilterCriteria>();
 
   // Pokémon types
@@ -117,27 +120,7 @@ export class FilterPanel {
   }
 
   getTypeColor(typeName: string): string {
-    const colors: { [key: string]: string } = {
-      grass: '#A7DB8D',
-      fire: '#f3bb94ff',
-      water: '#9DB7F5',
-      bug: '#C6D16E',
-      normal: '#C6C6A7',
-      poison: '#C183C1',
-      electric: '#FAE078',
-      ground: '#EBD69D',
-      fairy: '#F4BDC9',
-      fighting: '#D67873',
-      psychic: '#FA92B2',
-      rock: '#D1C17D',
-      ghost: '#A292BC',
-      ice: '#BCE6E6',
-      dragon: '#A27DFA',
-      dark: '#A29288',
-      steel: '#D1D1E0',
-      flying: '#C6B7F5',
-    };
-    return colors[typeName.toLowerCase()] || '#C6C6A7';
+    return this.pokemonUtils.getColorForType(typeName);
   }
 
   get hasActiveFilters(): boolean {

@@ -1,0 +1,146 @@
+<div class="min-h-screen py-8" style="background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);">
+  <div class="container mx-auto px-4 max-w-6xl">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-5xl font-bold mb-2" style="color: #fbc02d;">
+        Who's That Pokémon?
+      </h1>
+      <p class="text-gray-700 text-lg">
+        Test your Pokémon knowledge
+      </p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="text-center my-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 mb-4 mx-auto" style="border-color: #fbc02d;"></div>
+        <p class="text-xl text-gray-700">Loading Pokémon...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
+        <p class="font-medium">{{ error }}</p>
+        <button
+          (click)="onNewPokemon()"
+          class="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+        >
+          Try Again
+        </button>
+      </div>
+    }
+
+    <!-- Main Game -->
+    @if (currentPokemon && !isLoading) {
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <!-- Left Column: Silhouette & Input -->
+        <div class="space-y-6">
+          <!-- Silhouette -->
+          <div class="bg-white rounded-xl shadow-lg p-8">
+            <app-pokemon-silhouette
+              [pokemon]="currentPokemon"
+              [isRevealed]="isRevealed || hasWon"
+            />
+          </div>
+
+          <!-- Guess Input -->
+          @if (!hasWon && !isRevealed) {
+            <app-guess-input
+              (guessSubmitted)="onGuessSubmitted($event)"
+              [disabled]="hasWon || isRevealed"
+            />
+          }
+
+          <!-- Action Buttons -->
+          <div class="flex gap-4 justify-center">
+            @if (!hasWon && !isRevealed) {
+              <button
+                (click)="onRevealAnswer()"
+                class="px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition shadow-md"
+                style="background-color: #757575;"
+              >
+                Reveal Answer
+              </button>
+            }
+
+            <button
+              (click)="onNewPokemon()"
+              class="px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition shadow-md"
+              style="background-color: #fbc02d;"
+            >
+              New Pokémon
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Hints & Stats -->
+        <div class="space-y-6">
+          <!-- Hints -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <app-guess-hints
+              [pokemon]="currentPokemon"
+              [attemptsCount]="attemptsCount"
+              [isRevealed]="isRevealed || hasWon"
+            />
+          </div>
+
+          <!-- Stats Chart (shown after 3 attempts or when revealed) -->
+          @if (attemptsCount >= 3 || isRevealed || hasWon) {
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4">Stats</h3>
+              <app-stats-chart [stats]="currentPokemon.stats" />
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Result Messages -->
+      @if (hasWon) {
+        <div class="bg-white border-2 rounded-xl p-6 max-w-2xl mx-auto text-center animate-bounce" style="border-color: #4caf50;">
+          <p class="text-3xl font-bold mb-2" style="color: #4caf50;">
+            Congratulations!
+          </p>
+          <p class="text-xl text-gray-700">
+            You guessed it in {{ attemptsCount }} attempt{{ attemptsCount !== 1 ? 's' : '' }}!
+          </p>
+          <p class="text-2xl font-bold text-gray-800 mt-2 capitalize">
+            It's {{ currentPokemon.name }}!
+          </p>
+        </div>
+      }
+
+      @if (isRevealed && !hasWon) {
+        <div class="bg-white border-2 rounded-xl p-6 max-w-2xl mx-auto text-center" style="border-color: #fbc02d;">
+          <p class="text-2xl font-bold mb-2" style="color: #fbc02d;">
+            The answer was:
+          </p>
+          <p class="text-3xl font-bold text-gray-800 capitalize">
+            {{ currentPokemon.name }}
+          </p>
+          <p class="text-sm text-gray-600 mt-2">
+            Better luck next time
+          </p>
+        </div>
+      }
+
+      <!-- Attempts History -->
+      @if (attempts.length > 0 && !hasWon) {
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">
+            Previous Attempts ({{ incorrectAttempts.length }})
+          </h3>
+          <div class="space-y-2">
+            @for (attempt of incorrectAttempts; track attempt.timestamp) {
+              <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                <span class="text-gray-700 font-medium capitalize">{{ attempt.guess }}</span>
+                <span class="text-red-500 text-sm">Incorrect</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+

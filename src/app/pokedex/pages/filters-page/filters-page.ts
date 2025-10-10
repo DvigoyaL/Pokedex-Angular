@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { PokemonDetails, EvolutionChain, ChainLink } from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
+import { PokemonUtilsService } from '../../services/pokemon-utils.service';
 import { forkJoin, switchMap, catchError, of, map, Observable } from 'rxjs';
 import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
 import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-modal-card';
@@ -26,6 +27,9 @@ export interface FilterCriteria {
   styleUrls: ['./filters-page.css'],
 })
 export default class FiltersPage implements OnInit {
+  private pokemonService = inject(Pokemon);
+  private pokemonUtils = inject(PokemonUtilsService);
+
   allPokemonList: PokemonDetails[] = [];
   filteredPokemonList: PokemonDetails[] = [];
   displayedPokemonList: PokemonDetails[] = [];
@@ -35,8 +39,6 @@ export default class FiltersPage implements OnInit {
   error: string | null = null;
   currentPage: number = 0;
   itemsPerPage: number = 21;
-
-  constructor(private pokemonService: Pokemon) {}
 
   ngOnInit(): void {
     this.loadInitialPokemon();
@@ -170,7 +172,7 @@ export default class FiltersPage implements OnInit {
 
       // Filtrar por generación (basado en ID)
       if (criteria.generations.length > 0) {
-        const generation = this.getGenerationFromId(pokemon.id);
+        const generation = this.pokemonUtils.getGenerationFromId(pokemon.id);
         if (!criteria.generations.includes(generation)) return false;
       }
 
@@ -193,18 +195,6 @@ export default class FiltersPage implements OnInit {
     });
 
     this.updateDisplayedPokemon();
-  }
-
-  private getGenerationFromId(id: number): number {
-    if (id <= 151) return 1;
-    if (id <= 251) return 2;
-    if (id <= 386) return 3;
-    if (id <= 493) return 4;
-    if (id <= 649) return 5;
-    if (id <= 721) return 6;
-    if (id <= 809) return 7;
-    if (id <= 905) return 8;
-    return 9;
   }
 
   private updateDisplayedPokemon(): void {
@@ -240,27 +230,7 @@ export default class FiltersPage implements OnInit {
   }
 
   getColorForType(typeName: string): string {
-    const colors: { [key: string]: string } = {
-      grass: '#A7DB8D',
-      fire: '#f3bb94ff',
-      water: '#9DB7F5',
-      bug: '#C6D16E',
-      normal: '#C6C6A7',
-      poison: '#C183C1',
-      electric: '#FAE078',
-      ground: '#EBD69D',
-      fairy: '#F4BDC9',
-      fighting: '#D67873',
-      psychic: '#FA92B2',
-      rock: '#D1C17D',
-      ghost: '#A292BC',
-      ice: '#BCE6E6',
-      dragon: '#A27DFA',
-      dark: '#A29288',
-      steel: '#D1D1E0',
-      flying: '#C6B7F5',
-    };
-    return colors[typeName.toLowerCase()] || '#C6C6A7';
+    return this.pokemonUtils.getColorForType(typeName);
   }
 
   onNextPage(): void {
