@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { PokemonDetails, EvolutionChain, ChainLink } from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
 import { PokemonUtilsService } from '../../services/pokemon-utils.service';
+import { FavoritesService } from '../../services/favorites.service';
 import { forkJoin, switchMap, catchError, of, map, Observable } from 'rxjs';
 import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
 import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-modal-card';
@@ -29,6 +30,7 @@ export interface FilterCriteria {
 export default class FiltersPage implements OnInit {
   private pokemonService = inject(Pokemon);
   private pokemonUtils = inject(PokemonUtilsService);
+  public favoritesService = inject(FavoritesService);
 
   allPokemonList: PokemonDetails[] = [];
   filteredPokemonList: PokemonDetails[] = [];
@@ -268,6 +270,19 @@ export default class FiltersPage implements OnInit {
 
   closeFilterPanel(): void {
     this.isFilterPanelOpen = false;
+  }
+
+  onFavoriteToggled(pokemon: PokemonDetails): void {
+    const favoritePokemon = {
+      id: pokemon.id,
+      name: pokemon.name,
+      imageUrl: pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default,
+    };
+    this.favoritesService.toggleFavorite(favoritePokemon);
+  }
+
+  isFavorite(pokemonId: number): boolean {
+    return this.favoritesService.isFavorite(pokemonId);
   }
 }
 

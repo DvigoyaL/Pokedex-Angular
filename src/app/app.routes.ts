@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pokedex/pages/filters-page/filters-page'),
   },
   {
+    path: 'favorites-page',
+    loadComponent: () => import('./pokedex/pages/favorites-page/favorites-page'),
+  },
+  {
     path: 'guess-page',
     loadComponent: () => import('./pokedex/pages/guess-page/guess-page'),
   },

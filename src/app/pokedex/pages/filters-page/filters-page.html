@@ -61,7 +61,10 @@
             <pokedex-pokemon-basic-card
               [pokemon]="pokemon"
               [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+              [showFavoriteButton]="true"
+              [isFavorite]="isFavorite(pokemon.id)"
               (cardClicked)="selectPokemon($event)"
+              (favoriteToggled)="onFavoriteToggled($event)"
             />
           }
         </ul>
