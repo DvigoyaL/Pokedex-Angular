@@ -19,3 +19,15 @@
   background-color: rgba(0, 0, 0, 0.4);
 }
 
+/* Prevent body scroll when mobile filter panel is open */
+body.filter-open {
+  overflow: hidden;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1023px) {
+  main {
+    margin-left: 0 !important;
+  }
+}
+

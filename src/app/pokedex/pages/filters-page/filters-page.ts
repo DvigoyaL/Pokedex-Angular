@@ -39,6 +39,7 @@ export default class FiltersPage implements OnInit {
   error: string | null = null;
   currentPage: number = 0;
   itemsPerPage: number = 21;
+  isFilterPanelOpen: boolean = false;
 
   ngOnInit(): void {
     this.loadInitialPokemon();
@@ -259,6 +260,14 @@ export default class FiltersPage implements OnInit {
 
   get totalResults(): number {
     return this.filteredPokemonList.length;
+  }
+
+  toggleFilterPanel(): void {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen;
+  }
+
+  closeFilterPanel(): void {
+    this.isFilterPanelOpen = false;
   }
 }
 
