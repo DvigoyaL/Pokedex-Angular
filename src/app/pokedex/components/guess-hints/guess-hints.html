@@ -1,0 +1,97 @@
+<div class="hints-container">
+  <h3 class="text-xl font-bold text-gray-800 mb-4">
+    Hints
+  </h3>
+
+  <div class="space-y-4">
+    <!-- Always visible: Generation -->
+    <div class="hint-item">
+      <span class="hint-label">Generation:</span>
+      <span class="hint-value">Gen {{ getGeneration() }}</span>
+    </div>
+
+    <!-- Always visible: Type(s) -->
+    <div class="hint-item">
+      <span class="hint-label">Type(s):</span>
+      <div class="flex gap-2 mt-1">
+        @for (type of pokemon().types; track type.slot) {
+          <span
+            class="type-badge px-3 py-1 rounded-full text-sm font-bold capitalize"
+            [style.background-color]="getTypeColor(type.type.name)"
+          >
+            {{ type.type.name }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Revealed after 2 attempts: Height & Weight -->
+    @if (shouldShowHint(2)) {
+      <div class="hint-item unlocked">
+        <span class="hint-label">Height:</span>
+        <span class="hint-value">{{ heightInMeters }}m</span>
+      </div>
+
+      <div class="hint-item unlocked">
+        <span class="hint-label">Weight:</span>
+        <span class="hint-value">{{ weightInKg }}kg</span>
+      </div>
+    } @else {
+      <div class="hint-item locked">
+        <span class="hint-label">Height & Weight:</span>
+        <span class="hint-value text-gray-400">Locked - 2 attempts required</span>
+      </div>
+    }
+
+    <!-- Revealed after 4 attempts: Habitat -->
+    @if (shouldShowHint(4)) {
+      <div class="hint-item unlocked">
+        <span class="hint-label">Habitat:</span>
+        <span class="hint-value capitalize">{{ pokemon().habitat || 'Unknown' }}</span>
+      </div>
+    } @else {
+      <div class="hint-item locked">
+        <span class="hint-label">Habitat:</span>
+        <span class="hint-value text-gray-400">Locked - 4 attempts required</span>
+      </div>
+    }
+
+    <!-- Progressive letter reveal after 5 attempts -->
+    @if (shouldShowHint(5)) {
+      <div class="hint-item unlocked">
+        <span class="hint-label">
+          @if (remainingLetters > 0) {
+            Name ({{ revealedLetters.length }} / {{ pokemon().name.length }} letters):
+          } @else {
+            Full Name Revealed:
+          }
+        </span>
+        <div class="hint-value uppercase font-bold text-2xl mt-2 letter-spacing" style="color: #fbc02d;">
+          <span>{{ revealedLetters }}</span>
+          @if (remainingLetters > 0) {
+            <span class="text-gray-300">{{ hiddenLettersPlaceholder }}</span>
+          }
+        </div>
+        @if (remainingLetters > 0) {
+          <p class="text-xs text-gray-500 mt-2">
+            One more letter revealed per attempt
+          </p>
+        }
+      </div>
+    } @else {
+      <div class="hint-item locked">
+        <span class="hint-label">Name Letters:</span>
+        <span class="hint-value text-gray-400">Locked - 5 attempts required</span>
+      </div>
+    }
+
+    <!-- Total attempts counter -->
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <div class="text-center">
+        <p class="text-sm text-gray-600">Attempts Made</p>
+        <p class="text-3xl font-bold" style="color: #fbc02d;">{{ attemptsCount() }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
