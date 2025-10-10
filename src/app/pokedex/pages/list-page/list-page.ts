@@ -10,6 +10,7 @@ import {
 } from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
 import { PokemonUtilsService } from '../../services/pokemon-utils.service';
+import { FavoritesService } from '../../services/favorites.service';
 import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
 import { SearchService } from '../../services/search.service';
 import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
@@ -27,6 +28,7 @@ export default class ListPage implements OnInit, OnDestroy {
   private pokemonService = inject(Pokemon);
   private searchService = inject(SearchService);
   private pokemonUtils = inject(PokemonUtilsService);
+  public favoritesService = inject(FavoritesService);
 
   pokemonList: PokemonDetails[] = [];
   allPokemonList: { name: string; url: string }[] = [];
@@ -237,6 +239,19 @@ export default class ListPage implements OnInit, OnDestroy {
 
   getColorForType(typeName: string): string {
     return this.pokemonUtils.getColorForType(typeName);
+  }
+
+  onFavoriteToggled(pokemon: PokemonDetails): void {
+    const favoritePokemon = {
+      id: pokemon.id,
+      name: pokemon.name,
+      imageUrl: pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default,
+    };
+    this.favoritesService.toggleFavorite(favoritePokemon);
+  }
+
+  isFavorite(pokemonId: number): boolean {
+    return this.favoritesService.isFavorite(pokemonId);
   }
 
   ngOnDestroy(): void {

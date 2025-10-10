@@ -1,0 +1,84 @@
+<div class="min-h-screen py-8 lg:pt-24" style="background: linear-gradient(135deg, #fffbe6 0%, #ffe082 100%);">
+  <div class="container mx-auto px-4 max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-4xl font-bold mb-2" style="color: #fbc02d;">
+          Favs
+        </h1>
+        <p class="text-gray-700 text-lg">
+          You have {{ favoritesService.count }} favorite{{ favoritesService.count !== 1 ? 's' : '' }}
+        </p>
+      </div>
+
+      @if (favoritesService.count > 0) {
+        <button
+          (click)="clearAllFavorites()"
+          class="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition shadow-md"
+        >
+          Clear All
+        </button>
+      }
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="text-center my-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 mb-4 mx-auto" style="border-color: #fbc02d;"></div>
+        <p class="text-xl text-gray-700">Loading your favorites...</p>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <p class="font-medium">{{ error }}</p>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && favoritePokemonList.length === 0) {
+      <div class="text-center py-20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-700 mb-2">No favorites yet</h3>
+        <p class="text-gray-600 mb-6">Start adding Pokémon to your favorites from the List page</p>
+        <a
+          routerLink="/list-page"
+          class="inline-block px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition shadow-md"
+          style="background-color: #fbc02d;"
+        >
+          Go to List
+        </a>
+      </div>
+    }
+
+    <!-- Favorites Grid -->
+    @if (!isLoading && favoritePokemonList.length > 0) {
+      <ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4">
+        @for (pokemon of favoritePokemonList; track pokemon.id) {
+          <pokedex-pokemon-basic-card
+            [pokemon]="pokemon"
+            [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+            [showFavoriteButton]="true"
+            [isFavorite]="true"
+            (cardClicked)="selectPokemon($event)"
+            (favoriteToggled)="onFavoriteToggled($event)"
+          />
+        }
+      </ul>
+    }
+  </div>
+</div>
+
+<!-- Modal for Pokemon Details -->
+@if (selectedPokemon) {
+  <pokedex-pokemon-modal-card
+    [pokemon]="selectedPokemon"
+    [pokemonList]="favoritePokemonList"
+    (modalClosed)="closeModal()"
+    (pokemonSelected)="selectPokemon($event)"
+  />
+}
+
