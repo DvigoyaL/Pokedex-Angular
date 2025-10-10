@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import {
   PokemonDetails,
   PokemonListResponse,
@@ -9,6 +9,7 @@ import {
   ChainLink,
 } from '../../interfaces/pokemon.model';
 import { Pokemon } from '../../services/pokemon';
+import { PokemonUtilsService } from '../../services/pokemon-utils.service';
 import { forkJoin, switchMap, catchError, of, map, Observable, Subscription } from 'rxjs';
 import { SearchService } from '../../services/search.service';
 import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
@@ -23,6 +24,10 @@ import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-mo
   styleUrl: './list-page.css',
 })
 export default class ListPage implements OnInit, OnDestroy {
+  private pokemonService = inject(Pokemon);
+  private searchService = inject(SearchService);
+  private pokemonUtils = inject(PokemonUtilsService);
+
   pokemonList: PokemonDetails[] = [];
   allPokemonList: { name: string; url: string }[] = [];
   filteredPokemonList: PokemonDetails[] = [];
@@ -33,8 +38,6 @@ export default class ListPage implements OnInit, OnDestroy {
   error: string | null = null;
 
   private searchSubscription: Subscription | undefined;
-
-  constructor(private pokemonService: Pokemon, private searchService: SearchService) {}
 
   ngOnInit(): void {
     this.loadAllPokemonNames();
@@ -233,27 +236,7 @@ export default class ListPage implements OnInit, OnDestroy {
   }
 
   getColorForType(typeName: string): string {
-    const colors: { [key: string]: string } = {
-      grass: '#A7DB8D',
-      fire: '#f3bb94ff',
-      water: '#9DB7F5',
-      bug: '#C6D16E',
-      normal: '#C6C6A7',
-      poison: '#C183C1',
-      electric: '#FAE078',
-      ground: '#EBD69D',
-      fairy: '#F4BDC9',
-      fighting: '#D67873',
-      psychic: '#FA92B2',
-      rock: '#D1C17D',
-      ghost: '#A292BC',
-      ice: '#BCE6E6',
-      dragon: '#A27DFA',
-      dark: '#A29288',
-      steel: '#D1D1E0',
-      flying: '#C6B7F5',
-    };
-    return colors[typeName.toLowerCase()] || '#C6C6A7';
+    return this.pokemonUtils.getColorForType(typeName);
   }
 
   ngOnDestroy(): void {
