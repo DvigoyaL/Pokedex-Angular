@@ -1,0 +1,32 @@
+<div class="silhouette-container">
+  <div class="relative">
+    <!-- Pokemon Image -->
+    <img
+      [src]="imageUrl"
+      [alt]="isRevealed() ? pokemon().name : 'Mystery Pokémon'"
+      [class.silhouette]="!isRevealed()"
+      [class.revealed]="isRevealed()"
+      class="pokemon-image mx-auto transition-all duration-500"
+    />
+
+    <!-- Question Mark Overlay (only when not revealed) -->
+    @if (!isRevealed()) {
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span class="text-9xl font-bold select-none" style="color: #fbc02d; opacity: 0.2;">?</span>
+      </div>
+    }
+  </div>
+
+  <!-- Pokemon Number (only when revealed) -->
+  @if (isRevealed()) {
+    <div class="text-center mt-4">
+      <p class="text-gray-500 text-sm">
+        #{{ pokemon().id.toString().padStart(4, '0') }}
+      </p>
+      <p class="text-3xl font-bold capitalize mt-2" style="color: #fbc02d;">
+        {{ pokemon().name }}
+      </p>
+    </div>
+  }
+</div>
+

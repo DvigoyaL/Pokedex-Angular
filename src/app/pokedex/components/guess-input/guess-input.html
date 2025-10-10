@@ -1,0 +1,32 @@
+<div class="bg-white rounded-xl shadow-lg p-6">
+  <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
+    Make Your Guess
+  </h3>
+
+  <div class="flex gap-3">
+    <input
+      type="text"
+      [(ngModel)]="guessValue"
+      (keypress)="onKeyPress($event)"
+      [disabled]="disabled()"
+      placeholder="Enter Pokémon name..."
+      class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed text-lg"
+      style="focus:border-color: #fbc02d; focus:ring-color: #fbc02d;"
+      autocomplete="off"
+    />
+
+    <button
+      (click)="onSubmit()"
+      [disabled]="!guessValue.trim() || disabled()"
+      class="px-6 py-3 text-white rounded-lg font-bold hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition shadow-md hover:shadow-lg text-lg"
+      style="background-color: #fbc02d;"
+    >
+      Guess
+    </button>
+  </div>
+
+  <p class="text-sm text-gray-500 mt-3 text-center">
+    Tip: Names are case-insensitive
+  </p>
+</div>
+

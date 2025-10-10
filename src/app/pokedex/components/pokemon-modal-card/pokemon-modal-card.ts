@@ -1,8 +1,9 @@
 // pokemon-modal-card.ts
 
-import { Component, input, output, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, input, output, OnInit, OnDestroy, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PokemonDetails } from '../../interfaces/pokemon.model';
+import { PokemonUtilsService } from '../../services/pokemon-utils.service';
 import StatsChart from '../stats-chart/stats-chart';
 import { PokemonTypeBadge } from './pokemon-type-badge/pokemon-type-badge';
 import { PokemonWeaknessBadge } from './pokemon-weakness-badge/pokemon-weakness-badge';
@@ -24,6 +25,8 @@ import { PokemonEvolutionItem } from './pokemon-evolution-item/pokemon-evolution
   styles: ``,
 })
 export class PokemonModalCard implements OnInit, OnDestroy {
+  private pokemonUtils = inject(PokemonUtilsService);
+
   pokemon = input.required<PokemonDetails | null>();
   pokemonList = input.required<PokemonDetails[]>();
 
@@ -74,27 +77,7 @@ export class PokemonModalCard implements OnInit, OnDestroy {
   }
 
   getColorForType(typeName: string): string {
-    const colors: { [key: string]: string } = {
-      grass: '#A7DB8D',
-      fire: '#f3bb94ff',
-      water: '#9DB7F5',
-      bug: '#C6D16E',
-      normal: '#C6C6A7',
-      poison: '#C183C1',
-      electric: '#FAE078',
-      ground: '#EBD69D',
-      fairy: '#F4BDC9',
-      fighting: '#D67873',
-      psychic: '#FA92B2',
-      rock: '#D1C17D',
-      ghost: '#A292BC',
-      ice: '#BCE6E6',
-      dragon: '#A27DFA',
-      dark: '#A29288',
-      steel: '#D1D1E0',
-      flying: '#C6B7F5',
-    };
-    return colors[typeName.toLowerCase()] || '#C6C6A7';
+    return this.pokemonUtils.getColorForType(typeName);
   }
 
   getTextColor(backgroundColor: string): string {
