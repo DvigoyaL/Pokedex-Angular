@@ -1,13 +1,31 @@
-@if (isLoading) {
+<!-- Loading State for Initial Pokemon List -->
+@if (isLoading && !isSearching) {
   <div class="text-center my-8">
     <p class="text-xl text-gray-600">Cargando Pokémon...</p>
   </div>
+}
 
-  }
+<!-- Error State -->
+@if (error && !isSearching) {
+  <div class="text-center my-8">
+    <p class="text-red-500 text-xl">{{ error }}</p>
+  </div>
+}
 
-@if (!isLoading && !error) {
+<!-- Search Results Component -->
+@if (isSearching) {
+  <app-search-results
+    [allPokemonList]="allPokemonList"
+    [limit]="limit"
+    (searchResultsChange)="onSearchResultsChange($event)"
+    (pokemonSelected)="onSearchPokemonSelected($event)"
+  ></app-search-results>
+}
+
+<!-- Regular Pokemon List (when not searching) -->
+@if (!isLoading && !error && !isSearching) {
   <ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 p-8">
-    @for (pokemon of filteredPokemonList; track pokemon.id) {
+    @for (pokemon of pokemonList; track pokemon.id) {
       <pokedex-pokemon-basic-card
         [pokemon]="pokemon"
         [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
@@ -16,24 +34,22 @@
         (cardClicked)="selectPokemon(pokemon)"
         (favoriteToggled)="onFavoriteToggled($event)"
       ></pokedex-pokemon-basic-card>
-
     }
   </ul>
 
-  <pokedex-pokemon-modal-card
-    [pokemon]="selectedPokemon"
-    [pokemonList]="filteredPokemonList"
-    (modalClosed)="closeModal()"
-    (pokemonSelected)="selectPokemon($event)"
-  ></pokedex-pokemon-modal-card>
-
-  @if (!isSearching()) {
-    <pokedex-pokemon-navigationButtons
-      [offset]="offset"
-      [isLoading]="isLoading"
-      (previousClicked)="onPreviousPage()"
-      (nextClicked)="onNextPage()"
-    ></pokedex-pokemon-navigationButtons>
-  }
-
+  <!-- Navigation Buttons (only when not searching) -->
+  <pokedex-pokemon-navigationButtons
+    [offset]="offset"
+    [isLoading]="isLoading"
+    (previousClicked)="onPreviousPage()"
+    (nextClicked)="onNextPage()"
+  ></pokedex-pokemon-navigationButtons>
 }
+
+<!-- Pokemon Modal (shared between search and list) -->
+<pokedex-pokemon-modal-card
+  [pokemon]="selectedPokemon"
+  [pokemonList]="isSearching ? [] : pokemonList"
+  (modalClosed)="closeModal()"
+  (pokemonSelected)="selectPokemon($event)"
+></pokedex-pokemon-modal-card>

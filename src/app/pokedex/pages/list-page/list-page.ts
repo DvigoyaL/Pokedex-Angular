@@ -16,11 +16,12 @@ import { SearchService } from '../../services/search.service';
 import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
 import { NavigationButtons } from '../../components/navigation-buttons/navigation-buttons';
 import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-modal-card';
+import { SearchResults, SearchResultsData } from '../../components/search-results/search-results';
 
 @Component({
   selector: 'pokedex-list-page',
   standalone: true,
-  imports: [CommonModule, PokemonBasicCard, NavigationButtons, PokemonModalCard],
+  imports: [CommonModule, PokemonBasicCard, NavigationButtons, PokemonModalCard, SearchResults],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
@@ -32,19 +33,17 @@ export default class ListPage implements OnInit, OnDestroy {
 
   pokemonList: PokemonDetails[] = [];
   allPokemonList: { name: string; url: string }[] = [];
-  filteredPokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
   offset: number = 0;
   limit: number = 21;
   isLoading: boolean = false;
   error: string | null = null;
-
-  private searchSubscription: Subscription | undefined;
+  isSearching: boolean = false;
 
   ngOnInit(): void {
     this.loadAllPokemonNames();
     this.loadPokemon();
-    this.subscribeToSearch();
+    this.subscribeToSearchState();
   }
 
   loadPokemon(): void {
@@ -70,7 +69,6 @@ export default class ListPage implements OnInit, OnDestroy {
       )
       .subscribe((detailedPokemons) => {
         this.pokemonList = detailedPokemons as PokemonDetails[];
-        this.filteredPokemonList = this.pokemonList; // Inicialmente, la lista filtrada es la lista completa
         this.isLoading = false;
       });
   }
@@ -82,44 +80,20 @@ export default class ListPage implements OnInit, OnDestroy {
     });
   }
 
-  private subscribeToSearch(): void {
-    this.searchSubscription = this.searchService.searchTerm$.subscribe((term) => {
-      this.onSearch(term);
+  private subscribeToSearchState(): void {
+    this.searchService.searchTerm$.subscribe((term) => {
+      this.isSearching = term.length > 0;
     });
   }
 
-  private onSearch(searchTerm: string): void {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    if (!searchTerm) {
-      this.filteredPokemonList = this.pokemonList;
-      this.error = null;
-      // Habilitar paginación
-    } else {
-      // Deshabilitar paginación y mostrar resultados de búsqueda
-      this.isLoading = true;
-      const matched = this.allPokemonList
-        .filter((pokemon) => pokemon.name.toLowerCase().includes(lowerCaseSearchTerm))
-        .slice(0, this.limit); // Limitar a los primeros 21 resultados
-
-      if (matched.length === 0) {
-        this.filteredPokemonList = [];
-        this.isLoading = false;
-        this.error = `No se encontraron Pokémon que coincidan con "${searchTerm}".`;
-        return;
-      }
-
-      const detailObservables = matched.map((pokemon) => this.getFullPokemonDetails(pokemon.url));
-
-      forkJoin(detailObservables).subscribe((detailedPokemons) => {
-        this.filteredPokemonList = detailedPokemons.filter((p) => p !== null) as PokemonDetails[];
-        this.isLoading = false;
-        this.error = null;
-      });
-    }
+  // Métodos para manejar eventos del componente de búsqueda
+  onSearchResultsChange(results: SearchResultsData): void {
+    // No sobrescribir isSearching aquí, ya que se maneja en subscribeToSearchState
+    // Solo emitir los resultados para que otros componentes puedan reaccionar si es necesario
   }
 
-  isSearching(): boolean {
-    return this.filteredPokemonList !== this.pokemonList;
+  onSearchPokemonSelected(pokemon: PokemonDetails): void {
+    this.selectedPokemon = pokemon;
   }
 
   selectPokemon(pokemon: PokemonDetails | { id: string }): void {
@@ -255,6 +229,6 @@ export default class ListPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.searchSubscription?.unsubscribe();
+    // No hay subscriptions que limpiar ya que el componente de búsqueda maneja su propia suscripción
   }
 }

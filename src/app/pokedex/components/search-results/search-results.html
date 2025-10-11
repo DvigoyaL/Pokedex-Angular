@@ -1,0 +1,67 @@
+<!-- Search Results Component -->
+<div class="search-results-container">
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+      <span class="ml-3 text-gray-600">Searching Pokémon...</span>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !isLoading) {
+    <div class="text-center py-8">
+      <div class="text-red-500 text-lg font-semibold mb-2">Oops!</div>
+      <p class="text-gray-600">{{ error }}</p>
+    </div>
+  }
+
+  <!-- No Results State -->
+  @if (!isLoading && !error && currentSearchTerm && searchResults.length === 0) {
+    <div class="text-center py-8">
+      <div class="text-gray-500 text-lg font-semibold mb-2">No results</div>
+      <p class="text-gray-400">No Pokémon found matching "{{ currentSearchTerm }}"</p>
+    </div>
+  }
+
+  <!-- Search Results Grid -->
+  @if (searchResults.length > 0 && !isLoading) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      @for (pokemon of searchResults; track pokemon.id) {
+        <pokedex-pokemon-basic-card
+          [pokemon]="pokemon"
+          [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+          [showFavoriteButton]="true"
+          [isFavorite]="isFavorite(pokemon.id)"
+          (cardClicked)="selectPokemon(pokemon)"
+          (favoriteToggled)="onFavoriteToggled($event)"
+        />
+      }
+    </div>
+
+    <!-- Search Results Info -->
+    <div class="mt-6 text-center">
+      <p class="text-sm text-gray-500">
+        Showing {{ searchResults.length }} result(s) for "{{ currentSearchTerm }}"
+      </p>
+    </div>
+  }
+
+  <!-- Empty State (when no search term) -->
+  @if (!currentSearchTerm && !isLoading) {
+    <div class="text-center py-12">
+      <div class="text-gray-400 text-lg mb-2">🔍</div>
+      <p class="text-gray-500">Type in the search bar to find Pokémon</p>
+    </div>
+  }
+</div>
+
+<!-- Pokemon Modal -->
+@if (selectedPokemon) {
+  <pokedex-pokemon-modal-card
+    [pokemon]="selectedPokemon"
+    [pokemonList]="[]"
+    (modalClosed)="closeModal()"
+    (pokemonSelected)="selectPokemon($event)"
+  />
+}
