@@ -1,13 +1,23 @@
 <div class="silhouette-container">
   <div class="relative">
-    <!-- Pokemon Image -->
-    <img
-      [src]="imageUrl"
-      [alt]="isRevealed() ? pokemon().name : 'Mystery Pokémon'"
-      [class.silhouette]="!isRevealed()"
-      [class.revealed]="isRevealed()"
-      class="pokemon-image mx-auto transition-all duration-500"
-    />
+    <!-- Pokemon Image - Solo mostrar img cuando esté revelado -->
+    @if (isRevealed()) {
+      <img
+        [src]="imageUrl"
+        [alt]="pokemon().name"
+        class="pokemon-image mx-auto transition-all duration-500 revealed"
+      />
+    } @else {
+      <!-- Div con background-image cuando no esté revelado para evitar arrastre y clic derecho -->
+      <div
+        class="pokemon-image mx-auto transition-all duration-500 silhouette"
+        [style.background-image]="'url(' + imageUrl + ')'"
+        draggable="false"
+        (contextmenu)="$event.preventDefault()"
+        (dragstart)="$event.preventDefault()"
+        (selectstart)="$event.preventDefault()"
+      ></div>
+    }
 
     <!-- Question Mark Overlay (only when not revealed) -->
     @if (!isRevealed()) {
