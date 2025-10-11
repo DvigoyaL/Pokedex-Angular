@@ -1,0 +1,1 @@
+import{N as a,i as t}from"./chunk-LOYXRZLP.js";var c=class e{searchTermSource=new t("");searchTerm$=this.searchTermSource.asObservable();updateSearchTerm(r){this.searchTermSource.next(r)}static \u0275fac=function(o){return new(o||e)};static \u0275prov=a({token:e,factory:e.\u0275fac,providedIn:"root"})};export{c as a};
