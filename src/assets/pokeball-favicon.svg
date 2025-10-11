@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Poké Ball Background -->
+  <circle cx="16" cy="16" r="15" fill="#fff" stroke="#000" stroke-width="2"/>
+
+  <!-- Top half (red) -->
+  <path d="M 2 16 A 14 14 0 0 1 30 16 L 16 16 Z" fill="#e74c3c"/>
+
+  <!-- Bottom half (white) -->
+  <path d="M 2 16 A 14 14 0 0 0 30 16 L 16 16 Z" fill="#fff"/>
+
+  <!-- Center line -->
+  <line x1="2" y1="16" x2="30" y2="16" stroke="#000" stroke-width="2"/>
+
+  <!-- Center button -->
+  <circle cx="16" cy="16" r="4" fill="#fff" stroke="#000" stroke-width="1"/>
+  <circle cx="16" cy="16" r="2" fill="#000"/>
+</svg>
+
