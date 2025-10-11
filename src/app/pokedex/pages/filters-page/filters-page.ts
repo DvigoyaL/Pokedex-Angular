@@ -20,6 +20,22 @@ export interface FilterCriteria {
   habitats: string[];
 }
 
+// Estados de la máquina de filtrado
+type FilterState = 'IDLE' | 'LOADING_PRIMARY' | 'PRIMARY_LOADED' | 'ERROR';
+
+interface PrimaryFilterInfo {
+  type: 'type' | 'generation' | 'habitat' | null;
+  value: string | number | null;
+}
+
+interface FilterStateData {
+  state: FilterState;
+  firstFilter: PrimaryFilterInfo; // El PRIMER filtro aplicado (el que llamó a la API)
+  additionalPrimaryFilters: FilterCriteria; // Filtros primarios adicionales aplicados localmente
+  apiResults: PokemonDetails[]; // Resultados de la API sin filtros adicionales
+  filteredResults: PokemonDetails[]; // Resultados con todos los filtros aplicados
+}
+
 @Component({
   selector: 'pokedex-filters-page',
   standalone: true,
@@ -32,50 +48,206 @@ export default class FiltersPage implements OnInit {
   private pokemonUtils = inject(PokemonUtilsService);
   public favoritesService = inject(FavoritesService);
 
-  allPokemonList: PokemonDetails[] = [];
-  filteredPokemonList: PokemonDetails[] = [];
+  // Estado de la máquina de filtrado
+  filterStateData: FilterStateData = {
+    state: 'IDLE',
+    firstFilter: { type: null, value: null },
+    additionalPrimaryFilters: { types: [], generations: [], habitats: [], minHeight: undefined, maxHeight: undefined, minWeight: undefined, maxWeight: undefined },
+    apiResults: [],
+    filteredResults: [],
+  };
+
   displayedPokemonList: PokemonDetails[] = [];
   selectedPokemon: PokemonDetails | null = null;
   isLoading: boolean = false;
-  isInitialLoad: boolean = true;
   error: string | null = null;
   currentPage: number = 0;
   itemsPerPage: number = 21;
   isFilterPanelOpen: boolean = false;
 
+  // Guardar los criterios actuales para filtros secundarios
+  private currentSecondaryCriteria: {
+    minHeight?: number;
+    maxHeight?: number;
+    minWeight?: number;
+    maxWeight?: number;
+  } = {};
+
   ngOnInit(): void {
-    this.loadInitialPokemon();
+    // Ya no cargamos Pokémon al inicio, esperamos a que el usuario filtre
   }
 
-  private loadInitialPokemon(): void {
-    this.isLoading = true;
-    this.isInitialLoad = true;
-    // Cargar los primeros 300 Pokémon para tener una buena base de datos
-    this.pokemonService
-      .getListPokemon(0, 300)
-      .pipe(
-        switchMap((listResponse) => {
-          if (!listResponse.results || listResponse.results.length === 0) {
-            return of([]);
-          }
-          const detailObservables = listResponse.results.map((pokemonListItem) =>
-            this.getFullPokemonDetails(pokemonListItem.url)
-          );
-          return forkJoin(detailObservables);
-        }),
-        catchError((error) => {
-          console.error('Failed to load Pokémon list', error);
-          this.error = 'No se pudieron cargar los Pokémon. Intenta de nuevo más tarde.';
-          return of([]);
-        })
-      )
-      .subscribe((detailedPokemons) => {
-        this.allPokemonList = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
-        this.filteredPokemonList = this.allPokemonList;
-        this.updateDisplayedPokemon();
-        this.isLoading = false;
-        this.isInitialLoad = false;
+  // Método principal que se llama cuando cambian los filtros
+  onFilterChange(criteria: FilterCriteria): void {
+    this.currentPage = 0;
+
+    // Detectar si hay filtros primarios
+    const hasPrimaryFilter = criteria.types.length > 0 ||
+                            criteria.generations.length > 0 ||
+                            criteria.habitats.length > 0;
+
+    // Detectar si hay filtros secundarios (altura/peso)
+    const hasSecondaryFilters = criteria.minHeight !== undefined ||
+                               criteria.maxHeight !== undefined ||
+                               criteria.minWeight !== undefined ||
+                               criteria.maxWeight !== undefined;
+
+    // Si no hay filtros, resetear al estado IDLE
+    if (!hasPrimaryFilter && !hasSecondaryFilters) {
+      this.resetFilters();
+      return;
+    }
+
+    // Si solo hay filtros secundarios sin primarios, ignorar
+    if (!hasPrimaryFilter && hasSecondaryFilters) {
+      return;
+    }
+
+    // Guardar filtros secundarios (altura/peso)
+    this.currentSecondaryCriteria = {
+      minHeight: criteria.minHeight,
+      maxHeight: criteria.maxHeight,
+      minWeight: criteria.minWeight,
+      maxWeight: criteria.maxWeight,
+    };
+
+    // Determinar el primer filtro que debe llamar a la API
+    const firstFilterToApply = this.determineFirstFilter(criteria);
+
+    // Si no hay primer filtro definido aún (estado IDLE), cargar desde API
+    if (this.filterStateData.state === 'IDLE' && firstFilterToApply) {
+      this.loadFromAPI(firstFilterToApply, criteria);
+      return;
+    }
+
+    // Si el primer filtro cambió (se desmarcó el original), recargar desde API
+    if (this.firstFilterWasRemoved(criteria) && firstFilterToApply) {
+      this.loadFromAPI(firstFilterToApply, criteria);
+      return;
+    }
+
+    // Si el primer filtro sigue activo, aplicar filtros adicionales localmente
+    if (this.filterStateData.state === 'PRIMARY_LOADED') {
+      this.filterStateData.additionalPrimaryFilters = criteria;
+      this.applyAllFiltersLocally(criteria);
+    }
+  }
+
+  // Determina cuál debe ser el primer filtro (prioridad: type > generation > habitat)
+  private determineFirstFilter(criteria: FilterCriteria): PrimaryFilterInfo | null {
+    if (criteria.types.length > 0) {
+      return { type: 'type', value: criteria.types[0] };
+    }
+    if (criteria.generations.length > 0) {
+      return { type: 'generation', value: criteria.generations[0] };
+    }
+    if (criteria.habitats.length > 0) {
+      return { type: 'habitat', value: criteria.habitats[0] };
+    }
+    return null;
+  }
+
+  // Verifica si el primer filtro fue removido
+  private firstFilterWasRemoved(criteria: FilterCriteria): boolean {
+    const currentFirst = this.filterStateData.firstFilter;
+
+    if (!currentFirst.type) return false;
+
+    // Verificar si el primer filtro actual ya no está en los criterios
+    if (currentFirst.type === 'type') {
+      return !criteria.types.includes(currentFirst.value as string);
+    }
+    if (currentFirst.type === 'generation') {
+      return !criteria.generations.includes(currentFirst.value as number);
+    }
+    if (currentFirst.type === 'habitat') {
+      return !criteria.habitats.includes(currentFirst.value as string);
+    }
+
+    return false;
+  }
+
+  // Carga datos desde la API usando el primer filtro
+  private loadFromAPI(firstFilter: PrimaryFilterInfo, allCriteria: FilterCriteria): void {
+    this.filterStateData.firstFilter = firstFilter;
+    this.filterStateData.additionalPrimaryFilters = allCriteria;
+
+    if (firstFilter.type === 'type') {
+      this.loadPokemonByType(firstFilter.value as string);
+    } else if (firstFilter.type === 'generation') {
+      this.loadPokemonByGeneration(firstFilter.value as number);
+    } else if (firstFilter.type === 'habitat') {
+      this.loadPokemonByHabitat(firstFilter.value as string);
+    }
+  }
+
+  private resetFilters(): void {
+    this.filterStateData = {
+      state: 'IDLE',
+      firstFilter: { type: null, value: null },
+      additionalPrimaryFilters: { types: [], generations: [], habitats: [], minHeight: undefined, maxHeight: undefined, minWeight: undefined, maxWeight: undefined },
+      apiResults: [],
+      filteredResults: [],
+    };
+    this.currentSecondaryCriteria = {};
+    this.displayedPokemonList = [];
+    this.error = null;
+  }
+
+  // Aplica todos los filtros (primarios adicionales + secundarios) sobre los resultados de la API
+  private applyAllFiltersLocally(criteria: FilterCriteria): void {
+    let results = [...this.filterStateData.apiResults];
+
+    // Aplicar filtros primarios adicionales (los que NO fueron usados para la llamada a la API)
+
+    // Filtrar por tipos adicionales
+    if (criteria.types.length > 0) {
+      results = results.filter((pokemon) => {
+        const pokemonTypes = pokemon.types.map((t) => t.type.name);
+
+        // Caso especial: Si hay 2 tipos, usar lógica AND (debe tener AMBOS)
+        if (criteria.types.length === 2 && this.filterStateData.firstFilter.type === 'type') {
+          // El primer tipo ya vino de la API, verificar que tenga el segundo tipo
+          const secondType = criteria.types.find(t => t !== this.filterStateData.firstFilter.value);
+          return secondType ? pokemonTypes.includes(secondType) : true;
+        }
+
+        // Para otros casos (generaciones, hábitats), usar lógica OR
+        return criteria.types.some((type) => pokemonTypes.includes(type));
       });
+    }
+
+    // Filtrar por generaciones adicionales
+    if (criteria.generations.length > 0) {
+      results = results.filter((pokemon) => {
+        const generation = this.pokemonUtils.getGenerationFromId(pokemon.id);
+        return criteria.generations.includes(generation);
+      });
+    }
+
+    // Filtrar por hábitats adicionales
+    if (criteria.habitats.length > 0) {
+      results = results.filter((pokemon) => {
+        return criteria.habitats.includes(pokemon.habitat || 'unknown');
+      });
+    }
+
+    // Aplicar filtros secundarios (altura/peso)
+    if (this.currentSecondaryCriteria.minHeight !== undefined) {
+      results = results.filter(p => p.height >= this.currentSecondaryCriteria.minHeight! * 10);
+    }
+    if (this.currentSecondaryCriteria.maxHeight !== undefined) {
+      results = results.filter(p => p.height <= this.currentSecondaryCriteria.maxHeight! * 10);
+    }
+    if (this.currentSecondaryCriteria.minWeight !== undefined) {
+      results = results.filter(p => p.weight >= this.currentSecondaryCriteria.minWeight! * 10);
+    }
+    if (this.currentSecondaryCriteria.maxWeight !== undefined) {
+      results = results.filter(p => p.weight <= this.currentSecondaryCriteria.maxWeight! * 10);
+    }
+
+    this.filterStateData.filteredResults = results;
+    this.updateDisplayedPokemon();
   }
 
   private getFullPokemonDetails(url: string): Observable<PokemonDetails | null> {
@@ -159,51 +331,167 @@ export default class FiltersPage implements OnInit {
     return chain;
   }
 
-  onFilterChange(criteria: FilterCriteria): void {
-    this.currentPage = 0;
-    this.applyFilters(criteria);
+  // Métodos para cargar desde endpoints específicos
+  private loadPokemonByType(typeName: string): void {
+    this.isLoading = true;
+    this.filterStateData.state = 'LOADING_PRIMARY';
+    this.error = null;
+
+    this.pokemonService.getPokemonByType(typeName)
+      .pipe(
+        switchMap((typeResponse) => {
+          if (!typeResponse.pokemon || typeResponse.pokemon.length === 0) {
+            return of([]);
+          }
+          const detailObservables = typeResponse.pokemon.map((item) =>
+            this.getFullPokemonDetails(item.pokemon.url)
+          );
+          return forkJoin(detailObservables);
+        }),
+        catchError((error) => {
+          console.error('Failed to load Pokémon by type', error);
+          this.error = `No se pudieron cargar Pokémon de tipo ${typeName}`;
+          this.filterStateData.state = 'ERROR';
+          return of([]);
+        })
+      )
+      .subscribe((detailedPokemons) => {
+        this.filterStateData.apiResults = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+        this.filterStateData.state = 'PRIMARY_LOADED';
+        // Aplicar todos los filtros adicionales sobre los resultados de la API
+        this.applyAllFiltersLocally(this.filterStateData.additionalPrimaryFilters);
+        this.isLoading = false;
+      });
   }
 
-  private applyFilters(criteria: FilterCriteria): void {
-    this.filteredPokemonList = this.allPokemonList.filter((pokemon) => {
-      // Filtrar por tipos (AND logic - el Pokémon debe tener TODOS los tipos seleccionados)
-      if (criteria.types.length > 0) {
-        const pokemonTypes = pokemon.types.map((t) => t.type.name);
-        const hasAllTypes = criteria.types.every((type) => pokemonTypes.includes(type));
-        if (!hasAllTypes) return false;
-      }
+  private loadPokemonByGeneration(generationId: number): void {
+    this.isLoading = true;
+    this.filterStateData.state = 'LOADING_PRIMARY';
+    this.error = null;
 
-      // Filtrar por generación (basado en ID)
-      if (criteria.generations.length > 0) {
-        const generation = this.pokemonUtils.getGenerationFromId(pokemon.id);
-        if (!criteria.generations.includes(generation)) return false;
-      }
-
-      // Filtrar por altura (convertir de metros a decímetros para comparar con la API)
-      // API usa decímetros: 1m = 10dm
-      if (criteria.minHeight !== undefined && pokemon.height < criteria.minHeight * 10) return false;
-      if (criteria.maxHeight !== undefined && pokemon.height > criteria.maxHeight * 10) return false;
-
-      // Filtrar por peso (convertir de kilogramos a hectogramos para comparar con la API)
-      // API usa hectogramos: 1kg = 10hg
-      if (criteria.minWeight !== undefined && pokemon.weight < criteria.minWeight * 10) return false;
-      if (criteria.maxWeight !== undefined && pokemon.weight > criteria.maxWeight * 10) return false;
-
-      // Filtrar por hábitat
-      if (criteria.habitats.length > 0) {
-        if (!criteria.habitats.includes(pokemon.habitat || 'unknown')) return false;
-      }
-
-      return true;
-    });
-
-    this.updateDisplayedPokemon();
+    this.pokemonService.getPokemonByGeneration(generationId)
+      .pipe(
+        switchMap((genResponse) => {
+          if (!genResponse.pokemon_species || genResponse.pokemon_species.length === 0) {
+            return of([]);
+          }
+          // Convertir URLs de species a URLs de pokemon
+          const detailObservables = genResponse.pokemon_species.map((species) => {
+            const speciesId = species.url.split('/').filter(Boolean).pop();
+            return this.getFullPokemonDetails(`https://pokeapi.co/api/v2/pokemon/${speciesId}/`);
+          });
+          return forkJoin(detailObservables);
+        }),
+        catchError((error) => {
+          console.error('Failed to load Pokémon by generation', error);
+          this.error = `No se pudieron cargar Pokémon de generación ${generationId}`;
+          this.filterStateData.state = 'ERROR';
+          return of([]);
+        })
+      )
+      .subscribe((detailedPokemons) => {
+        this.filterStateData.apiResults = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+        this.filterStateData.state = 'PRIMARY_LOADED';
+        // Aplicar todos los filtros adicionales sobre los resultados de la API
+        this.applyAllFiltersLocally(this.filterStateData.additionalPrimaryFilters);
+        this.isLoading = false;
+      });
   }
+
+  private loadPokemonByHabitat(habitatName: string): void {
+    this.isLoading = true;
+    this.filterStateData.state = 'LOADING_PRIMARY';
+    this.error = null;
+
+    // Caso especial: 'unknown' no existe como endpoint en la API
+    // Necesitamos cargar Pokémon de varias generaciones y filtrar los que no tienen hábitat
+    if (habitatName === 'unknown') {
+      this.loadPokemonWithoutHabitat();
+      return;
+    }
+
+    this.pokemonService.getPokemonByHabitat(habitatName)
+      .pipe(
+        switchMap((habitatResponse) => {
+          if (!habitatResponse.pokemon_species || habitatResponse.pokemon_species.length === 0) {
+            return of([]);
+          }
+          // Convertir URLs de species a URLs de pokemon
+          const detailObservables = habitatResponse.pokemon_species.map((species) => {
+            const speciesId = species.url.split('/').filter(Boolean).pop();
+            return this.getFullPokemonDetails(`https://pokeapi.co/api/v2/pokemon/${speciesId}/`);
+          });
+          return forkJoin(detailObservables);
+        }),
+        catchError((error) => {
+          console.error('Failed to load Pokémon by habitat', error);
+          this.error = `No se pudieron cargar Pokémon de hábitat ${habitatName}`;
+          this.filterStateData.state = 'ERROR';
+          return of([]);
+        })
+      )
+      .subscribe((detailedPokemons) => {
+        this.filterStateData.apiResults = detailedPokemons.filter(p => p !== null) as PokemonDetails[];
+        this.filterStateData.state = 'PRIMARY_LOADED';
+        // Aplicar todos los filtros adicionales sobre los resultados de la API
+        this.applyAllFiltersLocally(this.filterStateData.additionalPrimaryFilters);
+        this.isLoading = false;
+      });
+  }
+
+  // Método especial para cargar Pokémon sin hábitat definido (unknown)
+  private loadPokemonWithoutHabitat(): void {
+    // Cargar Pokémon de las primeras generaciones (donde hay más Pokémon sin hábitat definido)
+    // Vamos a cargar Gen 1-8 para tener una buena cobertura
+    const generationObservables = [1, 2, 3, 4, 5, 6, 7, 8].map(genId =>
+      this.pokemonService.getPokemonByGeneration(genId)
+    );
+
+    forkJoin(generationObservables)
+      .pipe(
+        switchMap((generationResponses) => {
+          // Combinar todos los Pokémon de todas las generaciones
+          const allSpecies: Array<{name: string, url: string}> = [];
+          generationResponses.forEach(genResponse => {
+            if (genResponse.pokemon_species) {
+              allSpecies.push(...genResponse.pokemon_species);
+            }
+          });
+
+          // Cargar detalles de todos
+          const detailObservables = allSpecies.map((species) => {
+            const speciesId = species.url.split('/').filter(Boolean).pop();
+            return this.getFullPokemonDetails(`https://pokeapi.co/api/v2/pokemon/${speciesId}/`);
+          });
+
+          return forkJoin(detailObservables);
+        }),
+        catchError((error) => {
+          console.error('Failed to load Pokémon without habitat', error);
+          this.error = 'No se pudieron cargar Pokémon sin hábitat definido';
+          this.filterStateData.state = 'ERROR';
+          return of([]);
+        })
+      )
+      .subscribe((detailedPokemons) => {
+        // Filtrar solo los que tienen habitat 'unknown' o null
+        const pokemonWithoutHabitat = detailedPokemons.filter(p =>
+          p !== null && (p.habitat === 'unknown' || p.habitat === null)
+        ) as PokemonDetails[];
+
+        this.filterStateData.apiResults = pokemonWithoutHabitat;
+        this.filterStateData.state = 'PRIMARY_LOADED';
+        // Aplicar todos los filtros adicionales sobre los resultados de la API
+        this.applyAllFiltersLocally(this.filterStateData.additionalPrimaryFilters);
+        this.isLoading = false;
+      });
+  }
+
 
   private updateDisplayedPokemon(): void {
     const startIndex = this.currentPage * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    this.displayedPokemonList = this.filteredPokemonList.slice(startIndex, endIndex);
+    this.displayedPokemonList = this.filterStateData.filteredResults.slice(startIndex, endIndex);
   }
 
   selectPokemon(pokemon: PokemonDetails | { id: string }): void {
@@ -237,7 +525,7 @@ export default class FiltersPage implements OnInit {
   }
 
   onNextPage(): void {
-    if ((this.currentPage + 1) * this.itemsPerPage < this.filteredPokemonList.length) {
+    if ((this.currentPage + 1) * this.itemsPerPage < this.filterStateData.filteredResults.length) {
       this.currentPage++;
       this.updateDisplayedPokemon();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -253,7 +541,7 @@ export default class FiltersPage implements OnInit {
   }
 
   get hasNextPage(): boolean {
-    return (this.currentPage + 1) * this.itemsPerPage < this.filteredPokemonList.length;
+    return (this.currentPage + 1) * this.itemsPerPage < this.filterStateData.filteredResults.length;
   }
 
   get hasPreviousPage(): boolean {
@@ -261,7 +549,7 @@ export default class FiltersPage implements OnInit {
   }
 
   get totalResults(): number {
-    return this.filteredPokemonList.length;
+    return this.filterStateData.filteredResults.length;
   }
 
   toggleFilterPanel(): void {

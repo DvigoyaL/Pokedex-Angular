@@ -3,143 +3,207 @@
   <div class="p-6 space-y-6">
       <!-- Types Filter -->
       <div class="filter-section">
-        <h3 class="text-lg font-bold text-gray-800 mb-3">
-          Type
-        </h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-bold text-gray-800">
+            Type
+          </h3>
+          @if (selectedTypesCount >= 2) {
+            <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
+              Máximo 2 tipos
+            </span>
+          }
+        </div>
         <div class="flex flex-wrap gap-2">
           @for (type of typeOptions; track type.value) {
             <button
               (click)="toggleType(type)"
               [style.background-color]="type.selected ? getTypeColor(type.value) : '#f3f4f6'"
               [style.color]="type.selected ? '#000' : '#6b7280'"
-              class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              [disabled]="!type.selected && selectedTypesCount >= 2"
+              class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 border-2"
+              [class.hover:scale-105]="type.selected || selectedTypesCount < 2"
               [class.border-gray-300]="!type.selected"
               [class.border-gray-700]="type.selected"
+              [class.opacity-40]="!type.selected && selectedTypesCount >= 2"
+              [class.cursor-not-allowed]="!type.selected && selectedTypesCount >= 2"
             >
               {{ type.label }}
             </button>
           }
         </div>
+        @if (selectedTypesCount === 2) {
+          <p class="text-xs text-gray-600 mt-2">
+            💡 Con 2 tipos: el Pokémon debe tener <strong>AMBOS</strong> tipos simultáneamente
+          </p>
+        }
       </div>
 
       <!-- Generations Filter -->
       <div class="filter-section">
-        <h3 class="text-lg font-bold text-gray-800 mb-3">
-          Generation
-        </h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-bold text-gray-800">
+            Generation
+          </h3>
+          @if (firstFilterType() === 'generation' && selectedGenerationsCount >= 1) {
+            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+              Solo 1 (primer filtro API)
+            </span>
+          }
+        </div>
         <div class="grid grid-cols-2 gap-2">
           @for (gen of generationOptions; track gen.value) {
             <button
               (click)="toggleGeneration(gen)"
+              [disabled]="!gen.selected && firstFilterType() === 'generation' && selectedGenerationsCount >= 1"
               [class.bg-blue-500]="gen.selected"
               [class.text-white]="gen.selected"
               [class.bg-gray-100]="!gen.selected"
               [class.text-gray-700]="!gen.selected"
-              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 border-2"
+              [class.hover:scale-105]="gen.selected || firstFilterType() !== 'generation' || selectedGenerationsCount < 1"
               [class.border-blue-600]="gen.selected"
               [class.border-gray-300]="!gen.selected"
+              [class.opacity-40]="!gen.selected && firstFilterType() === 'generation' && selectedGenerationsCount >= 1"
+              [class.cursor-not-allowed]="!gen.selected && firstFilterType() === 'generation' && selectedGenerationsCount >= 1"
             >
               {{ gen.label }}
             </button>
           }
         </div>
+        @if (firstFilterType() === 'type' && selectedGenerationsCount > 0) {
+          <p class="text-xs text-gray-600 mt-2">
+            💡 Subfiltrado: múltiples generaciones sobre tipos cargados
+          </p>
+        } @else if (firstFilterType() === 'habitat' && selectedGenerationsCount > 0) {
+          <p class="text-xs text-gray-600 mt-2">
+            💡 Subfiltrado: generaciones sobre hábitat cargado
+          </p>
+        }
       </div>
 
       <!-- Habitat Filter -->
       <div class="filter-section">
-        <h3 class="text-lg font-bold text-gray-800 mb-3">
-          Habitat
-        </h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-bold text-gray-800">
+            Habitat
+          </h3>
+          @if (firstFilterType() === 'habitat' && selectedHabitatsCount >= 1) {
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+              Solo 1 (primer filtro API)
+            </span>
+          }
+        </div>
         <div class="grid grid-cols-2 gap-2">
           @for (habitat of habitatOptions; track habitat.value) {
             <button
               (click)="toggleHabitat(habitat)"
+              [disabled]="!habitat.selected && firstFilterType() === 'habitat' && selectedHabitatsCount >= 1"
               [class.bg-green-500]="habitat.selected"
               [class.text-white]="habitat.selected"
               [class.bg-gray-100]="!habitat.selected"
               [class.text-gray-700]="!habitat.selected"
-              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-105 border-2"
+              class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 border-2"
+              [class.hover:scale-105]="habitat.selected || firstFilterType() !== 'habitat' || selectedHabitatsCount < 1"
               [class.border-green-600]="habitat.selected"
               [class.border-gray-300]="!habitat.selected"
+              [class.opacity-40]="!habitat.selected && firstFilterType() === 'habitat' && selectedHabitatsCount >= 1"
+              [class.cursor-not-allowed]="!habitat.selected && firstFilterType() === 'habitat' && selectedHabitatsCount >= 1"
             >
               {{ habitat.label }}
             </button>
           }
         </div>
+        @if (firstFilterType() === 'type' && selectedHabitatsCount > 0) {
+          <p class="text-xs text-gray-600 mt-2">
+            💡 Subfiltrado: múltiples hábitats sobre tipos cargados
+          </p>
+        } @else if (firstFilterType() === 'generation' && selectedHabitatsCount > 0) {
+          <p class="text-xs text-gray-600 mt-2">
+            💡 Subfiltrado: hábitats sobre generación cargada
+          </p>
+        }
       </div>
 
-      <!-- Height and Weight Ranges -->
-      <div class="space-y-6">
-        <!-- Height Range -->
-        <div class="filter-section">
-          <h3 class="text-lg font-bold text-gray-800 mb-3">
-            Height (m)
-          </h3>
-          <div class="flex gap-2 items-center">
-            <div class="flex-1">
-              <label class="block text-xs text-gray-600 mb-1">Min</label>
-              <input
-                type="number"
-                [(ngModel)]="minHeight"
-                (ngModelChange)="onRangeChange()"
-                placeholder="0"
-                min="0"
-                step="0.1"
-                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
-              />
-            </div>
-            <span class="text-gray-500 mt-5">-</span>
-            <div class="flex-1">
-              <label class="block text-xs text-gray-600 mb-1">Max</label>
-              <input
-                type="number"
-                [(ngModel)]="maxHeight"
-                (ngModelChange)="onRangeChange()"
-                placeholder="∞"
-                min="0"
-                step="0.1"
-                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
-              />
-            </div>
+      <!-- Height and Weight Ranges - Solo visibles cuando hay un filtro primario activo -->
+      @if (hasPrimaryFilterActive) {
+        <div class="space-y-6 pt-4 border-t-2 border-yellow-400">
+          <div class="bg-yellow-50 p-3 rounded-lg">
+            <p class="text-xs text-gray-700 font-semibold">
+              🔍 Filtros adicionales sobre los resultados
+            </p>
           </div>
-          <p class="text-xs text-gray-500 mt-1">e.g. 1.5m = 150cm</p>
-        </div>
 
-        <!-- Weight Range -->
-        <div class="filter-section">
-          <h3 class="text-lg font-bold text-gray-800 mb-3">
-            Weight (kg)
-          </h3>
-          <div class="flex gap-2 items-center">
-            <div class="flex-1">
-              <label class="block text-xs text-gray-600 mb-1">Min</label>
-              <input
-                type="number"
-                [(ngModel)]="minWeight"
-                (ngModelChange)="onRangeChange()"
-                placeholder="0"
-                min="0"
-                step="0.1"
-                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
-              />
+          <!-- Height Range -->
+          <div class="filter-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">
+              Height (m)
+            </h3>
+            <div class="flex gap-2 items-center">
+              <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">Min</label>
+                <input
+                  type="number"
+                  [(ngModel)]="minHeight"
+                  (ngModelChange)="onRangeChange()"
+                  placeholder="0"
+                  min="0"
+                  step="0.1"
+                  class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+                />
+              </div>
+              <span class="text-gray-500 mt-5">-</span>
+              <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">Max</label>
+                <input
+                  type="number"
+                  [(ngModel)]="maxHeight"
+                  (ngModelChange)="onRangeChange()"
+                  placeholder="∞"
+                  min="0"
+                  step="0.1"
+                  class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+                />
+              </div>
             </div>
-            <span class="text-gray-500 mt-5">-</span>
-            <div class="flex-1">
-              <label class="block text-xs text-gray-600 mb-1">Max</label>
-              <input
-                type="number"
-                [(ngModel)]="maxWeight"
-                (ngModelChange)="onRangeChange()"
-                placeholder="∞"
-                min="0"
-                step="0.1"
-                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
-              />
-            </div>
+            <p class="text-xs text-gray-500 mt-1">e.g. 1.5m = 150cm</p>
           </div>
-          <p class="text-xs text-gray-500 mt-1">e.g. 6.5kg = 6500g</p>
+
+          <!-- Weight Range -->
+          <div class="filter-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">
+              Weight (kg)
+            </h3>
+            <div class="flex gap-2 items-center">
+              <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">Min</label>
+                <input
+                  type="number"
+                  [(ngModel)]="minWeight"
+                  (ngModelChange)="onRangeChange()"
+                  placeholder="0"
+                  min="0"
+                  step="0.1"
+                  class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+                />
+              </div>
+              <span class="text-gray-500 mt-5">-</span>
+              <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">Max</label>
+                <input
+                  type="number"
+                  [(ngModel)]="maxWeight"
+                  (ngModelChange)="onRangeChange()"
+                  placeholder="∞"
+                  min="0"
+                  step="0.1"
+                  class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+                />
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">e.g. 6.5kg = 6500g</p>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Clear Filters Button -->
       @if (hasActiveFilters) {

@@ -1,4 +1,4 @@
-import { Component, output, inject } from '@angular/core';
+import { Component, output, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterCriteria } from '../../pages/filters-page/filters-page';
@@ -10,6 +10,8 @@ interface FilterOption {
   selected: boolean;
 }
 
+export type FirstFilterType = 'type' | 'generation' | 'habitat' | null;
+
 @Component({
   selector: 'app-filter-panel',
   standalone: true,
@@ -20,7 +22,29 @@ interface FilterOption {
 export class FilterPanel {
   private pokemonUtils = inject(PokemonUtilsService);
 
+  // Input que recibe el tipo del primer filtro desde el padre
+  firstFilterType = input<FirstFilterType>(null);
+
   filterChange = output<FilterCriteria>();
+
+  // Control de filtros primarios vs secundarios
+  get hasPrimaryFilterActive(): boolean {
+    return this.typeOptions.some((opt) => opt.selected) ||
+           this.generationOptions.some((opt) => opt.selected) ||
+           this.habitatOptions.some((opt) => opt.selected);
+  }
+
+  get selectedTypesCount(): number {
+    return this.typeOptions.filter((opt) => opt.selected).length;
+  }
+
+  get selectedGenerationsCount(): number {
+    return this.generationOptions.filter((opt) => opt.selected).length;
+  }
+
+  get selectedHabitatsCount(): number {
+    return this.habitatOptions.filter((opt) => opt.selected).length;
+  }
 
   // Pokémon types
   typeOptions: FilterOption[] = [
@@ -77,18 +101,80 @@ export class FilterPanel {
   maxWeight: number | null = null;
 
   toggleType(type: FilterOption): void {
+    // Limitar a máximo 2 tipos seleccionados
+    const selectedTypes = this.typeOptions.filter(opt => opt.selected);
+
+    if (!type.selected && selectedTypes.length >= 2) {
+      // Ya hay 2 tipos seleccionados, no permitir más
+      return;
+    }
+
     type.selected = !type.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
   }
 
   toggleGeneration(gen: FilterOption): void {
+    // Si el primer filtro es una GENERACIÓN, solo permitir 1 generación
+    // (porque la API ya cargó esa generación específica)
+    if (this.firstFilterType() === 'generation') {
+      const selectedGens = this.generationOptions.filter(opt => opt.selected);
+
+      if (!gen.selected && selectedGens.length >= 1) {
+        // Ya hay 1 generación seleccionada como primer filtro, no permitir más
+        return;
+      }
+
+      // Si se va a seleccionar esta generación, deseleccionar las demás
+      if (!gen.selected) {
+        this.generationOptions.forEach((opt) => (opt.selected = false));
+      }
+    }
+
     gen.selected = !gen.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
   }
 
   toggleHabitat(habitat: FilterOption): void {
+    // Si el primer filtro es un HÁBITAT, solo permitir 1 hábitat
+    // (porque la API ya cargó ese hábitat específico)
+    if (this.firstFilterType() === 'habitat') {
+      const selectedHabitats = this.habitatOptions.filter(opt => opt.selected);
+
+      if (!habitat.selected && selectedHabitats.length >= 1) {
+        // Ya hay 1 hábitat seleccionado como primer filtro, no permitir más
+        return;
+      }
+
+      // Si se va a seleccionar este hábitat, deseleccionar los demás
+      if (!habitat.selected) {
+        this.habitatOptions.forEach((opt) => (opt.selected = false));
+      }
+    }
+
     habitat.selected = !habitat.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
+  }
+
+  private clearSecondaryFilters(): void {
+    this.minHeight = null;
+    this.maxHeight = null;
+    this.minWeight = null;
+    this.maxWeight = null;
   }
 
   onRangeChange(): void {
@@ -99,10 +185,7 @@ export class FilterPanel {
     this.typeOptions.forEach((opt) => (opt.selected = false));
     this.generationOptions.forEach((opt) => (opt.selected = false));
     this.habitatOptions.forEach((opt) => (opt.selected = false));
-    this.minHeight = null;
-    this.maxHeight = null;
-    this.minWeight = null;
-    this.maxWeight = null;
+    this.clearSecondaryFilters();
     this.emitFilterChange();
   }
 
