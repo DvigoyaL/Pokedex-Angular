@@ -62,8 +62,8 @@ export default class ListPage implements OnInit, OnDestroy {
           return forkJoin(detailObservables);
         }),
         catchError((error) => {
-          console.error('Falló la carga de la lista de Pokémon', error);
-          this.error = 'No se pudieron cargar los Pokémon. Intenta de nuevo más tarde.';
+          console.error('Failed to load Pokémon list', error);
+          this.error = 'Could not load Pokémon. Please try again later.';
           return of([]);
         })
       )

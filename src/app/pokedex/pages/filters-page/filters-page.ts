@@ -362,7 +362,7 @@ export default class FiltersPage implements OnInit {
         }),
         catchError((error) => {
           console.error('Failed to load Pokémon by type', error);
-          this.error = `No se pudieron cargar Pokémon de tipo ${typeName}`;
+          this.error = `Could not load Pokémon of type ${typeName}`;
           this.filterStateData.state = 'ERROR';
           return of([]);
         })
@@ -396,7 +396,7 @@ export default class FiltersPage implements OnInit {
         }),
         catchError((error) => {
           console.error('Failed to load Pokémon by generation', error);
-          this.error = `No se pudieron cargar Pokémon de generación ${generationId}`;
+          this.error = `Could not load Pokémon from generation ${generationId}`;
           this.filterStateData.state = 'ERROR';
           return of([]);
         })
@@ -437,7 +437,7 @@ export default class FiltersPage implements OnInit {
         }),
         catchError((error) => {
           console.error('Failed to load Pokémon by habitat', error);
-          this.error = `No se pudieron cargar Pokémon de hábitat ${habitatName}`;
+          this.error = `Could not load Pokémon from habitat ${habitatName}`;
           this.filterStateData.state = 'ERROR';
           return of([]);
         })
@@ -480,7 +480,7 @@ export default class FiltersPage implements OnInit {
         }),
         catchError((error) => {
           console.error('Failed to load Pokémon without habitat', error);
-          this.error = 'No se pudieron cargar Pokémon sin hábitat definido';
+          this.error = 'Could not load Pokémon without defined habitat';
           this.filterStateData.state = 'ERROR';
           return of([]);
         })
