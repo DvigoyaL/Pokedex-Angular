@@ -61,6 +61,17 @@ export class Navbar {
     }
   }
 
+  // Método para limpiar la búsqueda
+  clearSearch(): void {
+    this.searchService.updateSearchTerm('');
+  }
+
+  // Método para navegar a List y limpiar búsqueda
+  navigateToList(): void {
+    this.clearSearch();
+    this.router.navigate(['/list-page']);
+  }
+
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
