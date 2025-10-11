@@ -1,0 +1,36 @@
+<div class="filter-section">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-lg font-bold text-gray-800">
+      Type
+    </h3>
+    @if (selectedCount() >= 2) {
+      <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
+        Máximo 2 tipos
+      </span>
+    }
+  </div>
+  <div class="flex flex-wrap gap-2">
+    @for (type of typeOptions(); track type.value) {
+      <button
+        (click)="onToggle(type)"
+        [style.background-color]="type.selected ? getTypeColor(type.value) : '#f3f4f6'"
+        [style.color]="type.selected ? '#000' : '#6b7280'"
+        [disabled]="!type.selected && selectedCount() >= 2"
+        class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 border-2"
+        [class.hover:scale-105]="type.selected || selectedCount() < 2"
+        [class.border-gray-300]="!type.selected"
+        [class.border-gray-700]="type.selected"
+        [class.opacity-40]="!type.selected && selectedCount() >= 2"
+        [class.cursor-not-allowed]="!type.selected && selectedCount() >= 2"
+      >
+        {{ type.label }}
+      </button>
+    }
+  </div>
+  @if (selectedCount() === 2) {
+    <p class="text-xs text-gray-600 mt-2">
+      💡 Con 2 tipos: el Pokémon debe tener <strong>AMBOS</strong> tipos simultáneamente
+    </p>
+  }
+</div>
+

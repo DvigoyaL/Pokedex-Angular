@@ -1,2 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
+
+/* Global styles to prevent horizontal scroll on mobile devices */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure all elements respect viewport width */
+* {
+  max-width: 100%;
+}
+
+/* Mobile-specific viewport fixes */
+@media (max-width: 768px) {
+  body {
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Prevent any element from causing horizontal scroll */
+  .container, .max-w-6xl, .max-w-4xl, .max-w-2xl {
+    max-width: 100vw;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

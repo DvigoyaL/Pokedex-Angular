@@ -18,13 +18,23 @@
           </a>
           <div class="hidden lg:block lg:ml-2">
             @for (option of menuOptions; track option.label) {
-            <a
-              [routerLink]="option.route"
-              routerLinkActive="bg-yellow-500"
-              class="ml-4 px-3 py-2 rounded-md text-sm leading-5 text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white transition duration-150 ease-in-out cursor-pointer focus:outline-none focus:text-white focus:bg-gray-700"
-            >
-              {{ option.label }}
-            </a>
+              @if (option.label === 'List') {
+                <a
+                  (click)="navigateToList()"
+                  routerLinkActive="bg-yellow-500"
+                  class="ml-4 px-3 py-2 rounded-md text-sm leading-5 text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white transition duration-150 ease-in-out cursor-pointer focus:outline-none focus:text-white focus:bg-gray-700"
+                >
+                  {{ option.label }}
+                </a>
+              } @else {
+                <a
+                  [routerLink]="option.route"
+                  routerLinkActive="bg-yellow-500"
+                  class="ml-4 px-3 py-2 rounded-md text-sm leading-5 text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white transition duration-150 ease-in-out cursor-pointer focus:outline-none focus:text-white focus:bg-gray-700"
+                >
+                  {{ option.label }}
+                </a>
+              }
             }
           </div>
         </div>
@@ -93,14 +103,24 @@
       <div class="md:hidden">
         <div class="px-2 pt-2 pb-3">
           @for (option of menuOptions; track option.label) {
-            <a
-              [routerLink]="option.route"
-              routerLinkActive="bg-yellow-500"
-              (click)="toggleMenu()"
-              class="mt-1 block px-3 py-2 rounded-md text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white focus:outline-none focus:text-white focus:bg-yellow-500 transition duration-150 ease-in-out"
-            >
-              {{ option.label }}
-            </a>
+            @if (option.label === 'List') {
+              <a
+                (click)="navigateToList(); toggleMenu()"
+                routerLinkActive="bg-yellow-500"
+                class="mt-1 block px-3 py-2 rounded-md text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white focus:outline-none focus:text-white focus:bg-yellow-500 transition duration-150 ease-in-out"
+              >
+                {{ option.label }}
+              </a>
+            } @else {
+              <a
+                [routerLink]="option.route"
+                routerLinkActive="bg-yellow-500"
+                (click)="toggleMenu()"
+                class="mt-1 block px-3 py-2 rounded-md text-gray-800 font-semibold hover:bg-yellow-500 hover:text-white focus:outline-none focus:text-white focus:bg-yellow-500 transition duration-150 ease-in-out"
+              >
+                {{ option.label }}
+              </a>
+            }
           }
         </div>
       </div>

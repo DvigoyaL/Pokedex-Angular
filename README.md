@@ -39,18 +39,36 @@ Pokedex-Angular/
 │   │   ├── app.ts                    # Componente raíz de la aplicación
 │   │   ├── app.routes.ts             # Configuración de rutas con lazy loading
 │   │   ├── app.config.ts             # Configuración de providers
+│   │   ├── app.html                  # Template principal
+│   │   ├── app.css                   # Estilos del componente raíz
 │   │   └── pokedex/
 │   │       ├── components/           # Componentes reutilizables
 │   │       │   ├── shared/
 │   │       │   │   └── navbar/       # Barra de navegación global
-│   │       │   ├── pokemon-basic-card/      # Tarjeta básica de Pokémon
-│   │       │   ├── pokemon-modal-card/      # Modal con detalles completos
-│   │       │   ├── filter-panel/            # Panel de filtros avanzados
-│   │       │   ├── navigation-buttons/      # Botones de paginación
-│   │       │   ├── stats-chart/             # Gráfico de estadísticas
-│   │       │   ├── pokemon-silhouette/      # Silueta para el juego
-│   │       │   ├── guess-input/             # Input del juego
-│   │       │   └── guess-hints/             # Pistas progresivas
+│   │       │   ├── filter-components/
+│   │       │   │   ├── filter-empty-state/     # Estado vacío de filtros
+│   │       │   │   ├── filter-error-message/   # Mensaje de error
+│   │       │   │   ├── filter-loading-state/   # Estado de carga
+│   │       │   │   ├── filter-no-results/      # Sin resultados
+│   │       │   │   ├── filter-panel/           # Panel principal de filtros
+│   │       │   │   │   ├── filter-generation-selector/  # Selector de generación
+│   │       │   │   │   ├── filter-habitat-selector/     # Selector de hábitat
+│   │       │   │   │   ├── filter-range-inputs/         # Inputs de rango
+│   │       │   │   │   └── filter-type-selector/        # Selector de tipos
+│   │       │   │   ├── filter-results/         # Resultados de filtros
+│   │       │   │   └── filter-stats-bar/       # Barra de estadísticas
+│   │       │   ├── pokemon-basic-card/         # Tarjeta básica de Pokémon
+│   │       │   ├── pokemon-modal-card/         # Modal con detalles completos
+│   │       │   │   ├── pokemon-ability-badge/  # Badge de habilidades
+│   │       │   │   ├── pokemon-evolution-item/ # Item de evolución
+│   │       │   │   ├── pokemon-type-badge/     # Badge de tipos
+│   │       │   │   └── pokemon-weakness-badge/ # Badge de debilidades
+│   │       │   ├── navigation-buttons/         # Botones de paginación
+│   │       │   ├── stats-chart/                # Gráfico de estadísticas
+│   │       │   ├── pokemon-silhouette/         # Silueta para el juego
+│   │       │   ├── guess-input/                # Input del juego
+│   │       │   ├── guess-hints/                # Pistas progresivas
+│   │       │   └── search-results/             # Resultados de búsqueda
 │   │       ├── pages/                # Páginas principales
 │   │       │   ├── landing-page/     # Página de inicio
 │   │       │   ├── list-page/        # Lista paginada con búsqueda
@@ -62,13 +80,26 @@ Pokedex-Angular/
 │   │       │   ├── favorites.service.ts      # Gestión de favoritos
 │   │       │   ├── search.service.ts         # Búsqueda global reactiva
 │   │       │   └── pokemon-utils.service.ts  # Utilidades y helpers
-│   │       └── interfaces/
-│   │           └── pokemon.model.ts  # Interfaces TypeScript
-│   ├── assets/                       # Recursos estáticos (iconos, imágenes)
+│   │       ├── interfaces/
+│   │       │   └── pokemon.model.ts  # Interfaces TypeScript
+│   │       └── mappers/              # Mappers para transformación de datos
+│   ├── assets/                       # Recursos estáticos
+│   │   └── icons/
+│   │       └── types/                # Iconos SVG de tipos Pokémon
+│   ├── index.html                    # Página principal HTML
+│   ├── main.ts                       # Punto de entrada de la aplicación
 │   └── styles.css                    # Estilos globales con TailwindCSS
 ├── dist/                             # Archivos compilados para producción
+├── public/                           # Archivos públicos
+│   └── favicon.ico                   # Favicon de la aplicación
+├── node_modules/                     # Dependencias de Node.js
 ├── package.json                      # Dependencias y scripts
-└── angular.json                      # Configuración de Angular CLI
+├── package-lock.json                 # Lock file de dependencias
+├── angular.json                      # Configuración de Angular CLI
+├── tsconfig.json                     # Configuración de TypeScript
+├── tsconfig.app.json                 # Configuración TS para app
+├── tsconfig.spec.json                # Configuración TS para tests
+└── TO-DO.md                          # Lista de tareas pendientes
 ```
 
 ---
@@ -310,6 +341,10 @@ Este proyecto fue creado con fines educativos.
 
 ## 🔗 Enlaces Útiles
 
+### 🌐 Aplicación Desplegada
+- **[Pokédex Angular - Demo en Vivo](https://pokedex-unillanista.netlify.app/)** - Aplicación desplegada en Netlify
+
+### 📚 Documentación Técnica
 - [Angular Documentation](https://angular.dev)
 - [PokeAPI Documentation](https://pokeapi.co/docs/v2)
 - [RxJS Documentation](https://rxjs.dev)

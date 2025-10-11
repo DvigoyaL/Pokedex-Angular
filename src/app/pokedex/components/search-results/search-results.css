@@ -1,0 +1,42 @@
+.search-results-container {
+  min-height: 400px;
+  padding: 1rem;
+}
+
+/* Animaciones para los estados de carga */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos para los estados vacíos */
+.text-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 640px) {
+  .search-results-container {
+    padding: 0.5rem;
+  }
+}
+
+/* Hover effects para las tarjetas */
+app-pokemon-basic-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+app-pokemon-basic-card:hover {
+  transform: translateY(-2px);
+}

@@ -1,26 +1,61 @@
-import { Component, output, inject } from '@angular/core';
+import { Component, output, inject, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterCriteria } from '../../pages/filters-page/filters-page';
 import { PokemonUtilsService } from '../../services/pokemon-utils.service';
+import { FilterTypeSelector } from './filter-type-selector/filter-type-selector';
+import { FilterGenerationSelector } from './filter-generation-selector/filter-generation-selector';
+import { FilterHabitatSelector } from './filter-habitat-selector/filter-habitat-selector';
+import { FilterRangeInputs } from './filter-range-inputs/filter-range-inputs';
 
-interface FilterOption {
+export interface FilterOption {
   value: string;
   label: string;
   selected: boolean;
 }
 
+export type FirstFilterType = 'type' | 'generation' | 'habitat' | null;
+
 @Component({
   selector: 'app-filter-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FilterTypeSelector,
+    FilterGenerationSelector,
+    FilterHabitatSelector,
+    FilterRangeInputs
+  ],
   templateUrl: './filter-panel.html',
   styleUrls: ['./filter-panel.css'],
 })
 export class FilterPanel {
   private pokemonUtils = inject(PokemonUtilsService);
 
+  // Input que recibe el tipo del primer filtro desde el padre
+  firstFilterType = input<FirstFilterType>(null);
+
   filterChange = output<FilterCriteria>();
+
+  // Control de filtros primarios vs secundarios
+  get hasPrimaryFilterActive(): boolean {
+    return this.typeOptions.some((opt) => opt.selected) ||
+           this.generationOptions.some((opt) => opt.selected) ||
+           this.habitatOptions.some((opt) => opt.selected);
+  }
+
+  get selectedTypesCount(): number {
+    return this.typeOptions.filter((opt) => opt.selected).length;
+  }
+
+  get selectedGenerationsCount(): number {
+    return this.generationOptions.filter((opt) => opt.selected).length;
+  }
+
+  get selectedHabitatsCount(): number {
+    return this.habitatOptions.filter((opt) => opt.selected).length;
+  }
 
   // Pokémon types
   typeOptions: FilterOption[] = [
@@ -70,25 +105,87 @@ export class FilterPanel {
     { value: 'unknown', label: 'Unknown', selected: false },
   ];
 
-  // Height and weight ranges
-  minHeight: number | null = null;
-  maxHeight: number | null = null;
-  minWeight: number | null = null;
-  maxWeight: number | null = null;
+  // Acceso al componente de rangos para leer sus valores
+  rangeInputsComponent = viewChild<FilterRangeInputs>(FilterRangeInputs);
 
   toggleType(type: FilterOption): void {
+    // Limitar a máximo 2 tipos seleccionados
+    const selectedTypes = this.typeOptions.filter(opt => opt.selected);
+
+    if (!type.selected && selectedTypes.length >= 2) {
+      // Ya hay 2 tipos seleccionados, no permitir más
+      return;
+    }
+
     type.selected = !type.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
   }
 
   toggleGeneration(gen: FilterOption): void {
+    // Si el primer filtro es una GENERACIÓN, solo permitir 1 generación
+    // (porque la API ya cargó esa generación específica)
+    if (this.firstFilterType() === 'generation') {
+      const selectedGens = this.generationOptions.filter(opt => opt.selected);
+
+      if (!gen.selected && selectedGens.length >= 1) {
+        // Ya hay 1 generación seleccionada como primer filtro, no permitir más
+        return;
+      }
+
+      // Si se va a seleccionar esta generación, deseleccionar las demás
+      if (!gen.selected) {
+        this.generationOptions.forEach((opt) => (opt.selected = false));
+      }
+    }
+
     gen.selected = !gen.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
   }
 
   toggleHabitat(habitat: FilterOption): void {
+    // Si el primer filtro es un HÁBITAT, solo permitir 1 hábitat
+    // (porque la API ya cargó ese hábitat específico)
+    if (this.firstFilterType() === 'habitat') {
+      const selectedHabitats = this.habitatOptions.filter(opt => opt.selected);
+
+      if (!habitat.selected && selectedHabitats.length >= 1) {
+        // Ya hay 1 hábitat seleccionado como primer filtro, no permitir más
+        return;
+      }
+
+      // Si se va a seleccionar este hábitat, deseleccionar los demás
+      if (!habitat.selected) {
+        this.habitatOptions.forEach((opt) => (opt.selected = false));
+      }
+    }
+
     habitat.selected = !habitat.selected;
+
+    // Si se deseleccionan todos los filtros primarios, limpiar filtros secundarios
+    if (!this.hasPrimaryFilterActive) {
+      this.clearSecondaryFilters();
+    }
     this.emitFilterChange();
+  }
+
+  private clearSecondaryFilters(): void {
+    const rangeInputs = this.rangeInputsComponent();
+    if (rangeInputs) {
+      rangeInputs.minHeight.set(undefined);
+      rangeInputs.maxHeight.set(undefined);
+      rangeInputs.minWeight.set(undefined);
+      rangeInputs.maxWeight.set(undefined);
+    }
   }
 
   onRangeChange(): void {
@@ -99,22 +196,20 @@ export class FilterPanel {
     this.typeOptions.forEach((opt) => (opt.selected = false));
     this.generationOptions.forEach((opt) => (opt.selected = false));
     this.habitatOptions.forEach((opt) => (opt.selected = false));
-    this.minHeight = null;
-    this.maxHeight = null;
-    this.minWeight = null;
-    this.maxWeight = null;
+    this.clearSecondaryFilters();
     this.emitFilterChange();
   }
 
   private emitFilterChange(): void {
+    const rangeInputs = this.rangeInputsComponent();
     const criteria: FilterCriteria = {
       types: this.typeOptions.filter((opt) => opt.selected).map((opt) => opt.value),
       generations: this.generationOptions.filter((opt) => opt.selected).map((opt) => parseInt(opt.value)),
       habitats: this.habitatOptions.filter((opt) => opt.selected).map((opt) => opt.value),
-      minHeight: this.minHeight ?? undefined,
-      maxHeight: this.maxHeight ?? undefined,
-      minWeight: this.minWeight ?? undefined,
-      maxWeight: this.maxWeight ?? undefined,
+      minHeight: rangeInputs?.minHeight() ?? undefined,
+      maxHeight: rangeInputs?.maxHeight() ?? undefined,
+      minWeight: rangeInputs?.minWeight() ?? undefined,
+      maxWeight: rangeInputs?.maxWeight() ?? undefined,
     };
     this.filterChange.emit(criteria);
   }
@@ -124,14 +219,15 @@ export class FilterPanel {
   }
 
   get hasActiveFilters(): boolean {
+    const rangeInputs = this.rangeInputsComponent();
     return (
       this.typeOptions.some((opt) => opt.selected) ||
       this.generationOptions.some((opt) => opt.selected) ||
       this.habitatOptions.some((opt) => opt.selected) ||
-      this.minHeight !== null ||
-      this.maxHeight !== null ||
-      this.minWeight !== null ||
-      this.maxWeight !== null
+      rangeInputs?.minHeight() !== undefined ||
+      rangeInputs?.maxHeight() !== undefined ||
+      rangeInputs?.minWeight() !== undefined ||
+      rangeInputs?.maxWeight() !== undefined
     );
   }
 }

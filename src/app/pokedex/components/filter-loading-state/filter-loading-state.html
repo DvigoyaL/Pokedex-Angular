@@ -1,0 +1,10 @@
+<div class="text-center my-8">
+  <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+  <p class="text-xl text-gray-600 mt-4">Loading Pokémon...</p>
+  @if (isLoadingUnknownHabitat()) {
+    <p class="text-sm text-gray-500 mt-2">
+      ⏳ This may take a bit longer (searching for Pokémon without habitat across 8 generations)
+    </p>
+  }
+</div>
+

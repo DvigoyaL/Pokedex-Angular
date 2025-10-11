@@ -1,0 +1,78 @@
+<div class="space-y-6 pt-4 border-t-2 border-yellow-400">
+  <div class="bg-yellow-50 p-3 rounded-lg">
+    <p class="text-xs text-gray-700 font-semibold">
+      🔍 Filtros adicionales sobre los resultados
+    </p>
+  </div>
+
+  <!-- Height Range -->
+  <div class="filter-section">
+    <h3 class="text-lg font-bold text-gray-800 mb-3">
+      Height (m)
+    </h3>
+    <div class="flex gap-2 items-center">
+      <div class="flex-1">
+        <label class="block text-xs text-gray-600 mb-1">Min</label>
+        <input
+          type="number"
+          [(ngModel)]="minHeight"
+          (ngModelChange)="onRangeChange()"
+          placeholder="0"
+          min="0"
+          step="0.1"
+          class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+        />
+      </div>
+      <span class="text-gray-500 mt-5">-</span>
+      <div class="flex-1">
+        <label class="block text-xs text-gray-600 mb-1">Max</label>
+        <input
+          type="number"
+          [(ngModel)]="maxHeight"
+          (ngModelChange)="onRangeChange()"
+          placeholder="∞"
+          min="0"
+          step="0.1"
+          class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+        />
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-1">e.g. 1.5m = 150cm</p>
+  </div>
+
+  <!-- Weight Range -->
+  <div class="filter-section">
+    <h3 class="text-lg font-bold text-gray-800 mb-3">
+      Weight (kg)
+    </h3>
+    <div class="flex gap-2 items-center">
+      <div class="flex-1">
+        <label class="block text-xs text-gray-600 mb-1">Min</label>
+        <input
+          type="number"
+          [(ngModel)]="minWeight"
+          (ngModelChange)="onRangeChange()"
+          placeholder="0"
+          min="0"
+          step="0.1"
+          class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+        />
+      </div>
+      <span class="text-gray-500 mt-5">-</span>
+      <div class="flex-1">
+        <label class="block text-xs text-gray-600 mb-1">Max</label>
+        <input
+          type="number"
+          [(ngModel)]="maxWeight"
+          (ngModelChange)="onRangeChange()"
+          placeholder="∞"
+          min="0"
+          step="0.1"
+          class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400 text-sm"
+        />
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-1">e.g. 6.5kg = 6500g</p>
+  </div>
+</div>
+

@@ -84,7 +84,7 @@ export default class StatsChart implements OnInit {
       ]
     };
   }
-  
+
   private formatStatName(name: string): string {
     const nameMap: { [key: string]: string } = {
       'hp': 'HP',
