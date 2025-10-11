@@ -33,8 +33,8 @@ export default class GuessPage implements OnInit {
   error: string | null = null;
   hasWon: boolean = false;
 
-  // IDs disponibles para adivinar (primeras 3 generaciones para empezar)
-  private readonly AVAILABLE_POKEMON_IDS = Array.from({ length: 386 }, (_, i) => i + 1);
+  // IDs disponibles para adivinar (todas las generaciones - 1,025 Pokémon)
+  private readonly AVAILABLE_POKEMON_IDS = Array.from({ length: 1025 }, (_, i) => i + 1);
 
   ngOnInit(): void {
     this.loadRandomPokemon();
