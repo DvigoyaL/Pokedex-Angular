@@ -1,4 +1,25 @@
 .chart-container {
-      max-width: 300px; /* Define el tamaño máximo que quieres */
-      margin: 0 auto;   /* Centra el contenedor horizontalmente */
-    }
+  max-width: 300px;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Responsive sizing for mobile devices */
+@media (max-width: 640px) {
+  .chart-container {
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 375px) {
+  .chart-container {
+    max-width: 220px;
+  }
+}
