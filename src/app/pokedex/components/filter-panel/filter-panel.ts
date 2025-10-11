@@ -1,10 +1,14 @@
-import { Component, output, inject, input } from '@angular/core';
+import { Component, output, inject, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterCriteria } from '../../pages/filters-page/filters-page';
 import { PokemonUtilsService } from '../../services/pokemon-utils.service';
+import { FilterTypeSelector } from './filter-type-selector/filter-type-selector';
+import { FilterGenerationSelector } from './filter-generation-selector/filter-generation-selector';
+import { FilterHabitatSelector } from './filter-habitat-selector/filter-habitat-selector';
+import { FilterRangeInputs } from './filter-range-inputs/filter-range-inputs';
 
-interface FilterOption {
+export interface FilterOption {
   value: string;
   label: string;
   selected: boolean;
@@ -15,7 +19,14 @@ export type FirstFilterType = 'type' | 'generation' | 'habitat' | null;
 @Component({
   selector: 'app-filter-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FilterTypeSelector,
+    FilterGenerationSelector,
+    FilterHabitatSelector,
+    FilterRangeInputs
+  ],
   templateUrl: './filter-panel.html',
   styleUrls: ['./filter-panel.css'],
 })
@@ -94,11 +105,8 @@ export class FilterPanel {
     { value: 'unknown', label: 'Unknown', selected: false },
   ];
 
-  // Height and weight ranges
-  minHeight: number | null = null;
-  maxHeight: number | null = null;
-  minWeight: number | null = null;
-  maxWeight: number | null = null;
+  // Acceso al componente de rangos para leer sus valores
+  rangeInputsComponent = viewChild<FilterRangeInputs>(FilterRangeInputs);
 
   toggleType(type: FilterOption): void {
     // Limitar a máximo 2 tipos seleccionados
@@ -171,10 +179,13 @@ export class FilterPanel {
   }
 
   private clearSecondaryFilters(): void {
-    this.minHeight = null;
-    this.maxHeight = null;
-    this.minWeight = null;
-    this.maxWeight = null;
+    const rangeInputs = this.rangeInputsComponent();
+    if (rangeInputs) {
+      rangeInputs.minHeight.set(undefined);
+      rangeInputs.maxHeight.set(undefined);
+      rangeInputs.minWeight.set(undefined);
+      rangeInputs.maxWeight.set(undefined);
+    }
   }
 
   onRangeChange(): void {
@@ -190,14 +201,15 @@ export class FilterPanel {
   }
 
   private emitFilterChange(): void {
+    const rangeInputs = this.rangeInputsComponent();
     const criteria: FilterCriteria = {
       types: this.typeOptions.filter((opt) => opt.selected).map((opt) => opt.value),
       generations: this.generationOptions.filter((opt) => opt.selected).map((opt) => parseInt(opt.value)),
       habitats: this.habitatOptions.filter((opt) => opt.selected).map((opt) => opt.value),
-      minHeight: this.minHeight ?? undefined,
-      maxHeight: this.maxHeight ?? undefined,
-      minWeight: this.minWeight ?? undefined,
-      maxWeight: this.maxWeight ?? undefined,
+      minHeight: rangeInputs?.minHeight() ?? undefined,
+      maxHeight: rangeInputs?.maxHeight() ?? undefined,
+      minWeight: rangeInputs?.minWeight() ?? undefined,
+      maxWeight: rangeInputs?.maxWeight() ?? undefined,
     };
     this.filterChange.emit(criteria);
   }
@@ -207,14 +219,15 @@ export class FilterPanel {
   }
 
   get hasActiveFilters(): boolean {
+    const rangeInputs = this.rangeInputsComponent();
     return (
       this.typeOptions.some((opt) => opt.selected) ||
       this.generationOptions.some((opt) => opt.selected) ||
       this.habitatOptions.some((opt) => opt.selected) ||
-      this.minHeight !== null ||
-      this.maxHeight !== null ||
-      this.minWeight !== null ||
-      this.maxWeight !== null
+      rangeInputs?.minHeight() !== undefined ||
+      rangeInputs?.maxHeight() !== undefined ||
+      rangeInputs?.minWeight() !== undefined ||
+      rangeInputs?.maxWeight() !== undefined
     );
   }
 }

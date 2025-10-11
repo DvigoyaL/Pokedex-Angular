@@ -1,0 +1,42 @@
+<div class="filter-section">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-lg font-bold text-gray-800">
+      Generation
+    </h3>
+    @if (firstFilterType() === 'generation' && selectedCount() >= 1) {
+      <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+        Solo 1 (primer filtro API)
+      </span>
+    }
+  </div>
+  <div class="grid grid-cols-2 gap-2">
+    @for (gen of generationOptions(); track gen.value) {
+      <button
+        (click)="onToggle(gen)"
+        [disabled]="isDisabled(gen)"
+        [class.bg-blue-500]="gen.selected"
+        [class.text-white]="gen.selected"
+        [class.bg-gray-100]="!gen.selected"
+        [class.text-gray-700]="!gen.selected"
+        class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 border-2"
+        [class.hover:scale-105]="gen.selected || firstFilterType() !== 'generation' || selectedCount() < 1"
+        [class.border-blue-600]="gen.selected"
+        [class.border-gray-300]="!gen.selected"
+        [class.opacity-40]="isDisabled(gen)"
+        [class.cursor-not-allowed]="isDisabled(gen)"
+      >
+        {{ gen.label }}
+      </button>
+    }
+  </div>
+  @if (firstFilterType() === 'type' && selectedCount() > 0) {
+    <p class="text-xs text-gray-600 mt-2">
+      💡 Subfiltrado: múltiples generaciones sobre tipos cargados
+    </p>
+  } @else if (firstFilterType() === 'habitat' && selectedCount() > 0) {
+    <p class="text-xs text-gray-600 mt-2">
+      💡 Subfiltrado: generaciones sobre hábitat cargado
+    </p>
+  }
+</div>
+

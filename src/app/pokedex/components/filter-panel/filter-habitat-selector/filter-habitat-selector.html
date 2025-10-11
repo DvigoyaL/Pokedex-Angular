@@ -1,0 +1,42 @@
+<div class="filter-section">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-lg font-bold text-gray-800">
+      Habitat
+    </h3>
+    @if (firstFilterType() === 'habitat' && selectedCount() >= 1) {
+      <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+        Solo 1 (primer filtro API)
+      </span>
+    }
+  </div>
+  <div class="grid grid-cols-2 gap-2">
+    @for (habitat of habitatOptions(); track habitat.value) {
+      <button
+        (click)="onToggle(habitat)"
+        [disabled]="isDisabled(habitat)"
+        [class.bg-green-500]="habitat.selected"
+        [class.text-white]="habitat.selected"
+        [class.bg-gray-100]="!habitat.selected"
+        [class.text-gray-700]="!habitat.selected"
+        class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 border-2"
+        [class.hover:scale-105]="habitat.selected || firstFilterType() !== 'habitat' || selectedCount() < 1"
+        [class.border-green-600]="habitat.selected"
+        [class.border-gray-300]="!habitat.selected"
+        [class.opacity-40]="isDisabled(habitat)"
+        [class.cursor-not-allowed]="isDisabled(habitat)"
+      >
+        {{ habitat.label }}
+      </button>
+    }
+  </div>
+  @if (firstFilterType() === 'type' && selectedCount() > 0) {
+    <p class="text-xs text-gray-600 mt-2">
+      💡 Subfiltrado: múltiples hábitats sobre tipos cargados
+    </p>
+  } @else if (firstFilterType() === 'generation' && selectedCount() > 0) {
+    <p class="text-xs text-gray-600 mt-2">
+      💡 Subfiltrado: hábitats sobre generación cargada
+    </p>
+  }
+</div>
+

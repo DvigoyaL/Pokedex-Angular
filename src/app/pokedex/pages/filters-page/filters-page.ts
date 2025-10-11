@@ -5,10 +5,13 @@ import { Pokemon } from '../../services/pokemon';
 import { PokemonUtilsService } from '../../services/pokemon-utils.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { forkJoin, switchMap, catchError, of, map, Observable } from 'rxjs';
-import { PokemonBasicCard } from '../../components/pokemon-basic-card/pokemon-basic-card';
 import { PokemonModalCard } from '../../components/pokemon-modal-card/pokemon-modal-card';
 import { FilterPanel } from '../../components/filter-panel/filter-panel';
-import { NavigationButtons } from '../../components/navigation-buttons/navigation-buttons';
+import { FilterEmptyState } from '../../components/filter-empty-state/filter-empty-state';
+import { FilterLoadingState } from '../../components/filter-loading-state/filter-loading-state';
+import { FilterErrorMessage } from '../../components/filter-error-message/filter-error-message';
+import { FilterNoResults } from '../../components/filter-no-results/filter-no-results';
+import { FilterResults } from '../../components/filter-results/filter-results';
 
 export interface FilterCriteria {
   types: string[];
@@ -39,7 +42,16 @@ interface FilterStateData {
 @Component({
   selector: 'pokedex-filters-page',
   standalone: true,
-  imports: [CommonModule, PokemonBasicCard, PokemonModalCard, FilterPanel, NavigationButtons],
+  imports: [
+    CommonModule,
+    PokemonModalCard,
+    FilterPanel,
+    FilterEmptyState,
+    FilterLoadingState,
+    FilterErrorMessage,
+    FilterNoResults,
+    FilterResults,
+  ],
   templateUrl: './filters-page.html',
   styleUrls: ['./filters-page.css'],
 })
@@ -571,6 +583,11 @@ export default class FiltersPage implements OnInit {
 
   isFavorite(pokemonId: number): boolean {
     return this.favoritesService.isFavorite(pokemonId);
+  }
+
+  // Método helper para obtener IDs de favoritos
+  get favoriteIds(): number[] {
+    return this.favoritesService.getFavorites().map((fav) => fav.id);
   }
 }
 

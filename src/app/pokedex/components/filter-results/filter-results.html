@@ -1,0 +1,30 @@
+<!-- Stats bar con filtros activos -->
+<app-filter-stats-bar
+  [currentResults]="displayedPokemon().length"
+  [totalResults]="totalResults()"
+  [firstFilter]="firstFilter()"
+  [additionalFilters]="additionalFilters()"
+/>
+
+<!-- Pokemon Grid -->
+<ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 p-8">
+  @for (pokemon of displayedPokemon(); track pokemon.id) {
+    <pokedex-pokemon-basic-card
+      [pokemon]="pokemon"
+      [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+      [showFavoriteButton]="true"
+      [isFavorite]="isFavorite(pokemon.id)"
+      (cardClicked)="pokemonSelected.emit($event)"
+      (favoriteToggled)="favoriteToggled.emit($event)"
+    />
+  }
+</ul>
+
+<!-- Navigation Buttons -->
+<pokedex-pokemon-navigationButtons
+  [offset]="currentPage() * itemsPerPage()"
+  [isLoading]="isLoading()"
+  (previousClicked)="previousPageClicked.emit()"
+  (nextClicked)="nextPageClicked.emit()"
+/>
+
