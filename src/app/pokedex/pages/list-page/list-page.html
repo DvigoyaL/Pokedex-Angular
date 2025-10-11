@@ -3,20 +3,22 @@
     <p class="text-xl text-gray-600">Cargando Pokémon...</p>
   </div>
 
-  } @if (!isLoading && !error) {
-    <ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 p-8">
-      @for (pokemon of filteredPokemonList; track pokemon.id) {
-        <pokedex-pokemon-basic-card
-          [pokemon]="pokemon"
-          [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
-          [showFavoriteButton]="true"
-          [isFavorite]="isFavorite(pokemon.id)"
-          (cardClicked)="selectPokemon(pokemon)"
-          (favoriteToggled)="onFavoriteToggled($event)"
-        ></pokedex-pokemon-basic-card>
+  }
 
-      }
-    </ul>
+@if (!isLoading && !error) {
+  <ul class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-4 p-8">
+    @for (pokemon of filteredPokemonList; track pokemon.id) {
+      <pokedex-pokemon-basic-card
+        [pokemon]="pokemon"
+        [backgroundColor]="getColorForType(pokemon.types[0].type.name)"
+        [showFavoriteButton]="true"
+        [isFavorite]="isFavorite(pokemon.id)"
+        (cardClicked)="selectPokemon(pokemon)"
+        (favoriteToggled)="onFavoriteToggled($event)"
+      ></pokedex-pokemon-basic-card>
+
+    }
+  </ul>
 
   <pokedex-pokemon-modal-card
     [pokemon]="selectedPokemon"
@@ -32,7 +34,6 @@
       (previousClicked)="onPreviousPage()"
       (nextClicked)="onNextPage()"
     ></pokedex-pokemon-navigationButtons>
-
   }
 
 }
